@@ -42,7 +42,7 @@ class AstronomyShow(models.Model):
         null=True,
         upload_to=astronomy_show_image_file_path
     )
-    speaker = models.ManyToManyField(
+    show_speaker = models.ManyToManyField(
         ShowSpeaker,
         related_name="show_speakers",
         blank=True
