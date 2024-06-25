@@ -1,2 +1,5 @@
 venv_planetarium
 .idea
+db.sqlite3
+migrations
+__pycache__/

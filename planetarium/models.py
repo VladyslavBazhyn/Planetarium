@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 
-from django.conf import settings
+from planetarium_service import settings
 
 
 def astronomy_show_image_file_path(instance, filename):
@@ -15,7 +15,7 @@ def astronomy_show_image_file_path(instance, filename):
     return os.path.join("uploads/astronomy_shows/", filename)
 
 
-class Speaker(models.Model):
+class ShowSpeaker(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     profession = models.CharField(max_length=30)
@@ -43,7 +43,7 @@ class AstronomyShow(models.Model):
         upload_to=astronomy_show_image_file_path
     )
     speaker = models.ManyToManyField(
-        Speaker,
+        ShowSpeaker,
         related_name="show_speakers",
         blank=True
     )
@@ -99,7 +99,7 @@ class Reservation(models.Model):
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=True,
+        on_delete=models.CASCADE,
         related_name="reservations"
     )
 
