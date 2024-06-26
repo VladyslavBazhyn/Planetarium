@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "planetarium",
     "user",
     "rest_framework",
+    "drf_spectacular"
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,31 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # "DEFAULT_THROTTLE_CLASSES": [
+    #     "rest_framework.throttling.AnonRateThrottle",
+    #     "rest_framework.throttling.UserRateThrottle",
+    # ],
+    # "DEFAULT_THROTTLE_RATES": {"anon": "10/day", "user": "30/day"},
+    # "DEFAULT_AUTHENTICATION_CLASSES": (
+    #     "rest_framework_simplejwt.authentication.JWTAuthentication",
+    # ),
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Planetarium Service API",
+    "DESCRIPTION": "Order tickets to planetarium shows, creating new shows and place speakers on it",
+    "VERSION": "0.0.1",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "defaultModelRendering": "model",
+        "defaultModelsExpandDepth": 2,
+        "defaultModelExpandDepth": 2,
+    },
+}
 
 ROOT_URLCONF = "planetarium_service.urls"
 
