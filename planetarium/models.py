@@ -19,9 +19,6 @@ class ShowSpeaker(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     profession = models.CharField(max_length=30)
-    # 1) Need to delete astronomy show field from diagram!!!
-    # 2) Want to add functionality, that same speaker couldn't
-    #    be on different show_sessions at the same time
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
