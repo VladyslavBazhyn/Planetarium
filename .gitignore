@@ -3,3 +3,4 @@ venv_planetarium
 db.sqlite3
 migrations
 __pycache__/
+Dairy
