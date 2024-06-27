@@ -42,11 +42,6 @@ class AstronomyShow(models.Model):
         null=True,
         upload_to=astronomy_show_image_file_path
     )
-    show_speaker = models.ManyToManyField(
-        ShowSpeaker,
-        related_name="show_speakers",
-        blank=True
-    )
     show_theme = models.ForeignKey(
         ShowTheme,
         on_delete=models.CASCADE,
@@ -82,15 +77,50 @@ class ShowSession(models.Model):
     planetarium_dome = models.ForeignKey(
         PlanetariumDome,
         on_delete=models.CASCADE,
-        related_name="show_sessions"
+        related_name="planetarium_dome"
     )
-    show_time = models.DateTimeField(auto_now_add=True)
+    show_speaker = models.ManyToManyField(
+        ShowSpeaker,
+        related_name="speakers_show",
+        blank=True
+    )
+    show_day = models.DateField()
+    time_start = models.TimeField()
+    time_end = models.TimeField()
 
     class Meta:
-        ordering = ["-show_time"]
+        ordering = ["-show_day", "-time_start", "-time_end"]
+
+    @staticmethod
+    def validate_show_speakers(
+            show_session,
+            error_to_raise
+    ):
+        for speaker in show_session.show_speaker.all():
+            other_speaker_shows = speaker.speakers_show.filter(
+                show_day=show_session.show_day
+            ).exclude(pk=show_session.pk)
+            for other_show in other_speaker_shows:
+                if (
+                    other_show.time_start <= show_session.time_end or
+                    other_show.time_end >= show_session.time_start
+                ):
+                    raise error_to_raise(
+                        f"Speaker {speaker.first_name} {speaker.last_name} "
+                        f"have other show(s) scheduled on the same day and time."
+                    )
+
+    def clean(self):
+        ShowSession.validate_show_speakers(
+            self,
+            ValidationError(
+                "At least one of the speakers can't be on this show session"
+                " because of other show at same time"
+            ),
+        )
 
     def __str__(self):
-        return f"{self.astronomy_show.title} {str(self.show_time)}"
+        return f"{self.astronomy_show.title} {str(self.show_day)} at {self.time_start}"
 
 
 class Reservation(models.Model):

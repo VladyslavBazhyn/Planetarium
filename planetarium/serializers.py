@@ -29,7 +29,6 @@ class ShowSpeakerSerializer(serializers.ModelSerializer):
 
 class AstronomyShowSerializer(serializers.ModelSerializer):
     show_theme = ShowThemeSerializer(many=True, read_only=True)
-    show_speaker = ShowSpeakerSerializer(many=True, read_only=False)
 
     class Meta:
         model = AstronomyShow
@@ -38,7 +37,6 @@ class AstronomyShowSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "poster",
-            "show_speaker",
             "show_theme",
             "poster"
         )
@@ -63,11 +61,18 @@ class PlanetariumDomeSerializer(serializers.ModelSerializer):
 class ShowSessionSerializer(serializers.ModelSerializer):
     astronomy_show = AstronomyShowSerializer(many=False, read_only=False)
     planetarium_dome = PlanetariumDomeSerializer(many=False, read_only=False)
+    show_speakers = ShowSpeakerSerializer(many=True, read_only=False)
 
     class Meta:
         model = ShowSession
         fields = (
-            "id", "astronomy_show", "planetarium_dome", "show_time"
+            "id",
+            "astronomy_show",
+            "planetarium_dome",
+            "show_speakers",
+            "show_day",
+            "time_start",
+            "time_end"
         )
 
 
