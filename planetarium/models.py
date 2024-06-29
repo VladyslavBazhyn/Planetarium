@@ -29,7 +29,7 @@ class ShowSpeaker(models.Model):
 
 
 class ShowTheme(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
 
 
 class AstronomyShow(models.Model):
@@ -39,9 +39,8 @@ class AstronomyShow(models.Model):
         null=True,
         upload_to=astronomy_show_image_file_path
     )
-    show_theme = models.ForeignKey(
+    show_themes = models.ManyToManyField(
         ShowTheme,
-        on_delete=models.CASCADE,
         related_name="show_themes",
     )
 
@@ -76,7 +75,7 @@ class ShowSession(models.Model):
         on_delete=models.CASCADE,
         related_name="planetarium_dome"
     )
-    show_speaker = models.ManyToManyField(
+    show_speakers = models.ManyToManyField(
         ShowSpeaker,
         related_name="speakers_show",
         blank=True
@@ -89,32 +88,30 @@ class ShowSession(models.Model):
         ordering = ["-show_day", "-time_start", "-time_end"]
 
     @staticmethod
-    def validate_show_speakers(
-            show_session,
-            error_to_raise
-    ):
-        for speaker in show_session.show_speaker.all():
+    def validate_show_speakers(show_speakers, show_day, time_start, time_end):
+        for speaker in show_speakers:
             other_speaker_shows = speaker.speakers_show.filter(
-                show_day=show_session.show_day
-            ).exclude(pk=show_session.pk)
+                show_day=show_day
+            )
             for other_show in other_speaker_shows:
                 if (
-                    other_show.time_start <= show_session.time_end or
-                    other_show.time_end >= show_session.time_start
+                        time_start <= other_show.time_start <= time_end or
+                        time_end >= other_show.time_end >= time_start
                 ):
-                    raise error_to_raise(
+                    raise ValidationError(
                         f"Speaker {speaker.first_name} {speaker.last_name} "
-                        f"have other show(s) scheduled on the same day and time."
+                        f"has another show scheduled on the same day and time."
                     )
 
     def clean(self):
-        ShowSession.validate_show_speakers(
-            self,
-            ValidationError(
-                "At least one of the speakers can't be on this show session"
-                " because of other show at same time"
-            ),
-        )
+        if self.pk:
+            self.validate_show_speakers(
+                self.show_speakers.all(), self.show_day, self.time_start, self.time_end
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(ShowSession, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.astronomy_show.title} {str(self.show_day)} at {self.time_start}"
@@ -127,7 +124,9 @@ class Reservation(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="reservations"
+        related_name="reservations",
+        null=True,
+        blank=True
     )
 
     def __str__(self):

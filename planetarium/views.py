@@ -46,7 +46,7 @@ class ShowSessionViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet
 ):
-    queryset = ShowSession.objects.all()
+    queryset = ShowSession.objects.all().select_related()
     serializer_class = ShowSessionSerializer
 
 
@@ -64,7 +64,7 @@ class TicketSerializerViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet
 ):
-    queryset = Ticket.objects.all()
+    queryset = Ticket.objects.all().select_related()
     serializer_class = TicketSerializer
 
 
@@ -78,7 +78,7 @@ class ReservationViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet
 ):
-    queryset = Reservation.objects.all()
+    queryset = Reservation.objects.all().select_related()
     serializer_class = ReservationSerializer
     pagination_class = ReservationPagination
 
