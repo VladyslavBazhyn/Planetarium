@@ -4,4 +4,5 @@ db.sqlite3
 migrations
 __pycache__/
 Dairy
-.drawio
+*.drawio
+*.exe
