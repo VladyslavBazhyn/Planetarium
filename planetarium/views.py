@@ -19,7 +19,7 @@ from planetarium.serializers import (
     TicketSerializer,
     ReservationSerializer,
     AstronomyShowSerializer,
-    AstronomyShowPosterSerializer
+    AstronomyShowPosterSerializer, ReservationListSerializer, ReservationDetailSerializer
 )
 
 
@@ -29,47 +29,27 @@ from planetarium.serializers import (
 # AstronomyShowSerializer(usual with slugfields instead of full serializer)
 # ]
 
-class PlanetariumDomeViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
+class PlanetariumDomeViewSet(viewsets.ModelViewSet):
     queryset = PlanetariumDome.objects.all()
     serializer_class = PlanetariumDomeSerializer
 
 
-class ShowThemeViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
+class ShowThemeViewSet(viewsets.ModelViewSet):
     queryset = ShowTheme.objects.all()
     serializer_class = ShowThemeSerializer
 
 
-class ShowSessionViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
+class ShowSessionViewSet(viewsets.ModelViewSet):
     queryset = ShowSession.objects.all().select_related()
     serializer_class = ShowSessionSerializer
 
 
-class ShowSpeakerViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
+class ShowSpeakerViewSet(viewsets.ModelViewSet):
     queryset = ShowSpeaker.objects.all()
     serializer_class = ShowSpeakerSerializer
 
 
-class TicketSerializerViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
+class TicketSerializerViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all().select_related()
     serializer_class = TicketSerializer
 
@@ -79,14 +59,19 @@ class ReservationPagination(PageNumberPagination):
     max_page_size = 30
 
 
-class ReservationViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
+class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.all().select_related()
-    serializer_class = ReservationSerializer
+    serializer_class = ReservationListSerializer
     pagination_class = ReservationPagination
+
+    def get_serializer_class(self):
+        serializer_class = self.serializer_class
+        if self.action == "list":
+            serializer_class = ReservationListSerializer
+        if self.action == "retrieve":
+            serializer_class = ReservationDetailSerializer
+        return serializer_class
+
 
 
 class AstronomyShowViewSet(viewsets.ModelViewSet):

@@ -38,7 +38,7 @@ class ShowSpeakerListSerializer(ShowSpeakerSerializer):
     class Meta:
         model = ShowSpeaker
         fields = (
-            "id", "full_name", "profession"
+            "full_name", "profession"
         )
 
 
@@ -158,22 +158,23 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class TicketListSerializer(TicketSerializer):
-    show_session = serializers.SlugRelatedField(
+    show_session_day = serializers.SlugRelatedField(
         many=False,
         queryset=ShowSession.objects.all(),
-        slug_field="id"
+        slug_field="show_day"
     )
-    show_session_astronomy_show_title = serializers.SlugRelatedField(
-        slug_field=ShowSession.astronomy_show.title,
-        read_only=True
-    )  # Is it a correct way to take appropriate to this ticket show session?
+    show_session_time_start = serializers.SlugRelatedField(
+        many=False,
+        queryset=ShowSession.objects.all(),
+        slug_field="time_start"
+    )
 
     class Meta:
         model = Ticket
         fields = (
             "id",
-            "show_session_astronomy_show_title",
-            "show_session",
+            "show_session_day",
+            "show_session_time_start",
             "row",
             "seat"
         )
@@ -189,43 +190,81 @@ class TicketListSerializer(TicketSerializer):
         return data
 
 
+class TicketSeatsSerializer(TicketSerializer):
+    class Meta:
+        model = Ticket
+        fields = ("row", "seat")
+
+
 class ReservationSerializer(serializers.ModelSerializer):
     tickets = TicketSerializer(many=True, read_only=False)
+    astronomy_show_title = serializers.SerializerMethodField()
+    taken_places = serializers.SerializerMethodField()
 
     class Meta:
         model = Reservation
-        fields = ("id", "created_at", "tickets")
+        fields = ("id", "created_at", "tickets", "astronomy_show_title")
+
+    def get_astronomy_show_title(self, obj):
+        show_session = obj.tickets.first().show_session
+        if show_session and show_session.astronomy_show:
+            return show_session.astronomy_show.title
+        return None
+
+    def get_taken_places(self, obj):
+        show_session = obj.tickets.first().show_session
+        if show_session:
+            taken_places = show_session.tickets.all()
+            return TicketSeatsSerializer(taken_places, many=True).data
+        return []
 
 
 class ReservationDetailSerializer(ReservationSerializer):
-    tickets = TicketListSerializer(many=True)
-    # astronomy_show_title =
-    # show session date / show session time start / show session speaker
-    # for all tickets: ticket row / ticket seat
+    show_session_date = serializers.SerializerMethodField()
+    show_session_time_start = serializers.SerializerMethodField()
+    show_session_speakers = serializers.SerializerMethodField()
 
     class Meta:
         model = Reservation
         fields = (
             "id",
-            # "astronomy_show_title",
-            # "show session date",
-            # "show session time start",
-            # "show session speaker",
-            "created_at",
-            "tickets",
+            "astronomy_show_title",
+            "show_session_date",
+            "show_session_time_start",
+            "taken_places",
+            "show_session_speakers",
+            "created_at"
         )
+
+    def get_show_session_date(self, obj):
+        show_session = obj.tickets.first().show_session
+        if show_session:
+            return show_session.show_day
+        return None
+
+    def get_show_session_time_start(self, obj):
+        show_session = obj.tickets.first().show_session
+        if show_session:
+            return show_session.time_start
+        return None
+
+    def get_show_session_speakers(self, obj):
+        show_session = obj.tickets.first().show_session
+        if show_session:
+            speakers = show_session.show_speakers.all()
+            return ShowSpeakerListSerializer(speakers, many=True).data
+        return []
 
 
 class ReservationListSerializer(ReservationSerializer):
-    # astronomy show title /
-    # count_of_all_tickets
+    taken_places = serializers.SerializerMethodField()
 
     class Meta:
         model = Reservation
         fields = (
             "id",
-            # "astronomy show title",
-            # "count_of_all_tickets"
+            "astronomy_show_title",
+            "taken_places"
         )
 
     def create(self, validated_data):
