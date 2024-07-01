@@ -23,6 +23,12 @@ from planetarium.serializers import (
 )
 
 
+# [
+#     showspeakerlistserializer,
+# AstronomyShowListSerializer,
+# AstronomyShowSerializer(usual with slugfields instead of full serializer)
+# ]
+
 class PlanetariumDomeViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,

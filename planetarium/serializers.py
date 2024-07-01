@@ -34,12 +34,16 @@ class ShowSpeakerSerializer(serializers.ModelSerializer):
         return f"{obj.first_name} {obj.last_name}"
 
 
+class ShowSpeakerListSerializer(ShowSpeakerSerializer):
+    class Meta:
+        model = ShowSpeaker
+        fields = (
+            "id", "full_name", "profession"
+        )
+
+
 class AstronomyShowSerializer(serializers.ModelSerializer):
-    show_themes = serializers.SlugRelatedField(
-        many=True,
-        queryset=ShowTheme.objects.all(),
-        slug_field="name"
-    )
+    show_themes = ShowThemeSerializer(many=True)
 
     class Meta:
         model = AstronomyShow
@@ -50,6 +54,14 @@ class AstronomyShowSerializer(serializers.ModelSerializer):
             "poster",
             "show_themes",
         )
+
+
+class AstronomyShowListSerializer(AstronomyShowSerializer):
+    show_themes = serializers.SlugRelatedField(
+        many=True,
+        queryset=ShowTheme.objects.all(),
+        slug_field="name"
+    )
 
     def create(self, validated_data):
         show_themes = validated_data.pop("show_themes")
@@ -75,6 +87,24 @@ class PlanetariumDomeSerializer(serializers.ModelSerializer):
 
 
 class ShowSessionSerializer(serializers.ModelSerializer):
+    astronomy_show = AstronomyShowSerializer(many=False)
+    planetarium_dome = PlanetariumDomeSerializer(many=False)
+    show_speakers = ShowSpeakerSerializer(many=True)
+
+    class Meta:
+        model = ShowSession
+        fields = (
+            "id",
+            "astronomy_show",
+            "planetarium_dome",
+            "show_speakers",
+            "show_day",
+            "time_start",
+            "time_end"
+        )
+
+
+class ShowSessionListSerializer(ShowSessionSerializer):
     astronomy_show = serializers.SlugRelatedField(
         many=False,
         slug_field="title",
@@ -89,18 +119,6 @@ class ShowSessionSerializer(serializers.ModelSerializer):
         many=True,
         queryset=ShowSpeaker.objects.all(),
     )
-
-    class Meta:
-        model = ShowSession
-        fields = (
-            "id",
-            "astronomy_show",
-            "planetarium_dome",
-            "show_speakers",
-            "show_day",
-            "time_start",
-            "time_end"
-        )
 
     def validate(self, data):
         show_speakers = data.get("show_speakers", [])
@@ -128,18 +146,36 @@ class ShowSessionSerializer(serializers.ModelSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
-    show_session = serializers.SlugRelatedField(
-        many=False,
-        queryset=ShowSession.objects.all(),
-        slug_field="id"
-    )
+    show_session = ShowSessionSerializer(many=False, read_only=True)
     row = serializers.IntegerField()
     seat = serializers.IntegerField()
 
     class Meta:
         model = Ticket
         fields = (
-            "id", "row", "seat", "show_session"
+            "id",  "show_session", "row", "seat"
+        )
+
+
+class TicketListSerializer(TicketSerializer):
+    show_session = serializers.SlugRelatedField(
+        many=False,
+        queryset=ShowSession.objects.all(),
+        slug_field="id"
+    )
+    show_session_astronomy_show_title = serializers.SlugRelatedField(
+        slug_field=ShowSession.astronomy_show.title,
+        read_only=True
+    )  # Is it a correct way to take appropriate to this ticket show session?
+
+    class Meta:
+        model = Ticket
+        fields = (
+            "id",
+            "show_session_astronomy_show_title",
+            "show_session",
+            "row",
+            "seat"
         )
 
     def validate(self, attrs):
@@ -159,6 +195,38 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = ("id", "created_at", "tickets")
+
+
+class ReservationDetailSerializer(ReservationSerializer):
+    tickets = TicketListSerializer(many=True)
+    # astronomy_show_title =
+    # show session date / show session time start / show session speaker
+    # for all tickets: ticket row / ticket seat
+
+    class Meta:
+        model = Reservation
+        fields = (
+            "id",
+            # "astronomy_show_title",
+            # "show session date",
+            # "show session time start",
+            # "show session speaker",
+            "created_at",
+            "tickets",
+        )
+
+
+class ReservationListSerializer(ReservationSerializer):
+    # astronomy show title /
+    # count_of_all_tickets
+
+    class Meta:
+        model = Reservation
+        fields = (
+            "id",
+            # "astronomy show title",
+            # "count_of_all_tickets"
+        )
 
     def create(self, validated_data):
         with transaction.atomic():
