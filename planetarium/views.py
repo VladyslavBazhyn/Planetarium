@@ -20,7 +20,8 @@ from planetarium.serializers import (
     ReservationSerializer,
     AstronomyShowSerializer,
     AstronomyShowPosterSerializer, ReservationListSerializer, ReservationDetailSerializer, ShowSpeakerListSerializer,
-    ShowSpeakerDetailSerializer
+    ShowSpeakerDetailSerializer, ShowThemeListSerializer, ShowThemeDetailSerializer, ShowSessionListSerializer,
+    ShowSessionDetailSerializer
 )
 
 
@@ -39,10 +40,28 @@ class ShowThemeViewSet(viewsets.ModelViewSet):
     queryset = ShowTheme.objects.all()
     serializer_class = ShowThemeSerializer
 
+    def get_serializer_class(self):
+        serializer_class = self.serializer_class
+        if self.action == "list":
+            serializer_class = ShowThemeListSerializer
+        if self.action == "retrieve":
+            serializer_class = ShowThemeDetailSerializer
+
+        return serializer_class
+
 
 class ShowSessionViewSet(viewsets.ModelViewSet):
     queryset = ShowSession.objects.all().select_related()
     serializer_class = ShowSessionSerializer
+
+    def get_serializer_class(self):
+        serializer_class = self.serializer_class
+        if self.action == "list":
+            serializer_class = ShowSessionListSerializer
+        if self.action == "retrieve":
+            serializer_class = ShowSessionDetailSerializer
+
+        return serializer_class
 
 
 class ShowSpeakerViewSet(viewsets.ModelViewSet):

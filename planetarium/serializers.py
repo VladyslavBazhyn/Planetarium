@@ -21,6 +21,18 @@ class ShowThemeSerializer(serializers.ModelSerializer):
         )
 
 
+class ShowThemeListSerializer(ShowThemeSerializer):
+    class Meta:
+        model = ShowTheme
+        fields = ("name", )
+
+
+class ShowThemeDetailSerializer(ShowThemeSerializer):
+    class Meta:
+        model = ShowTheme
+        fields = ("id", "name", )
+
+
 class ShowSpeakerSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
 
@@ -98,9 +110,25 @@ class PlanetariumDomeSerializer(serializers.ModelSerializer):
 
 
 class ShowSessionSerializer(serializers.ModelSerializer):
-    astronomy_show = AstronomyShowSerializer(many=False)
-    planetarium_dome = PlanetariumDomeSerializer(many=False)
-    show_speakers = ShowSpeakerSerializer(many=True)
+    astronomy_show = serializers.SlugRelatedField(
+        slug_field="title",
+        queryset=AstronomyShow.objects.all(),
+        many=False
+    )
+    planetarium_dome = serializers.SlugRelatedField(
+        slug_field="name",
+        queryset=PlanetariumDome.objects.all(),
+        many=False
+    )
+    show_speakers = serializers.PrimaryKeyRelatedField(
+        queryset=ShowSpeaker.objects.all(),
+        many=True
+    )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["show_speakers"] = ShowSpeakerSerializer(instance.show_speakers, many=True).data
+        return representation
 
     class Meta:
         model = ShowSession
@@ -114,6 +142,13 @@ class ShowSessionSerializer(serializers.ModelSerializer):
             "time_end"
         )
 
+    def create(self, validated_data):
+        show_speakers = validated_data.pop("show_speakers", None)
+        show_session = ShowSession.objects.create(**validated_data)
+        if show_speakers:
+            show_session.show_speakers.set(show_speakers)
+        return show_session
+
 
 class ShowSessionListSerializer(ShowSessionSerializer):
     astronomy_show = serializers.SlugRelatedField(
@@ -126,10 +161,23 @@ class ShowSessionListSerializer(ShowSessionSerializer):
         slug_field="name",
         queryset=PlanetariumDome.objects.all(),
     )
-    show_speakers = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=ShowSpeaker.objects.all(),
-    )
+    # show_speakers = ShowSpeakerListSerializer(many=True)
+
+    class Meta:
+        model = ShowSession
+        fields = (
+            "astronomy_show",
+            "planetarium_dome",
+            "show_day",
+            "time_start",
+            "time_end",
+            "show_speakers",
+        )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["show_speakers"] = ShowSpeakerListSerializer(instance.show_speakers, many=True).data
+        return representation
 
     def validate(self, data):
         show_speakers = data.get("show_speakers", [])
@@ -143,17 +191,9 @@ class ShowSessionListSerializer(ShowSessionSerializer):
 
         return data
 
-    def create(self, validated_data):
-        show_speakers = validated_data.pop("show_speakers", None)
-        show_session = ShowSession.objects.create(**validated_data)
-        if show_speakers:
-            show_session.show_speakers.set(show_speakers)
-        return show_session
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation["show_speakers"] = ShowSpeakerSerializer(instance.show_speakers, many=True).data
-        return representation
+class ShowSessionDetailSerializer(ShowSessionSerializer):
+    pass
 
 
 class TicketSerializer(serializers.ModelSerializer):
