@@ -42,6 +42,17 @@ class ShowSpeakerListSerializer(ShowSpeakerSerializer):
         )
 
 
+class ShowSpeakerDetailSerializer(ShowSpeakerSerializer):
+    class Meta:
+        model = ShowSpeaker
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "profession"
+        )
+
+
 class AstronomyShowSerializer(serializers.ModelSerializer):
     show_themes = ShowThemeSerializer(many=True)
 
