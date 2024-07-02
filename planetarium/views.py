@@ -90,7 +90,7 @@ class ReservationPagination(PageNumberPagination):
 
 class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.all().select_related()
-    serializer_class = ReservationListSerializer
+    serializer_class = ReservationSerializer
     pagination_class = ReservationPagination
 
     def get_serializer_class(self):

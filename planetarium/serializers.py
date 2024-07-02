@@ -39,7 +39,8 @@ class ShowSpeakerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShowSpeaker
         fields = (
-            "id", "first_name", "last_name", "profession", "full_name")
+            "id", "first_name", "last_name", "profession", "full_name"
+        )
         read_only_fields = ("full_name", "id")
 
     def get_full_name(self, obj):
@@ -197,7 +198,7 @@ class ShowSessionDetailSerializer(ShowSessionSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
-    show_session = ShowSessionSerializer(many=False, read_only=True)
+    show_session = serializers.PrimaryKeyRelatedField(many=False, queryset=ShowSession.objects.all())
     row = serializers.IntegerField()
     seat = serializers.IntegerField()
 
@@ -254,7 +255,17 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ("id", "created_at", "tickets", "astronomy_show_title")
+        fields = (
+            "id", "created_at", "tickets", "astronomy_show_title", "taken_places"
+        )
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            tickets_data = validated_data.pop("tickets")
+            reservation = Reservation.objects.create(**validated_data)
+            for ticket_data in tickets_data:
+                Ticket.objects.create(reservation=reservation, **ticket_data)
+            return reservation
 
     def get_astronomy_show_title(self, obj):
         show_session = obj.tickets.first().show_session
@@ -317,11 +328,3 @@ class ReservationListSerializer(ReservationSerializer):
             "astronomy_show_title",
             "taken_places"
         )
-
-    def create(self, validated_data):
-        with transaction.atomic():
-            tickets_data = validated_data.pop("tickets")
-            reservation = Reservation.objects.create(**validated_data)
-            for ticket_data in tickets_data:
-                Ticket.objects.create(reservation=reservation, **ticket_data)
-            return reservation
