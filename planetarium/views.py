@@ -151,6 +151,18 @@ class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
     pagination_class = ReservationPagination
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "show_title",
+                type=OpenApiTypes.INT,
+                description="Filter by astronomy_show_title (ex. ?show_title=title)",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_serializer_class(self):
         serializer_class = self.serializer_class
         if self.action == "list":
@@ -158,6 +170,16 @@ class ReservationViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             serializer_class = ReservationDetailSerializer
         return serializer_class
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        show_title = self.request.query_params.get("show_title")
+
+        if show_title:
+            queryset = queryset.filter(tickets__show_session__astronomy_show__title__icontains=show_title)
+
+        return queryset
 
 
 class AstronomyShowViewSet(viewsets.ModelViewSet):
