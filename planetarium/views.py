@@ -1,4 +1,8 @@
+from datetime import datetime
+
 from django.db.models import F, Count
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins, status
 from django.shortcuts import render
 from rest_framework.pagination import PageNumberPagination
@@ -62,8 +66,8 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
         .select_related("astronomy_show", "planetarium_dome")
         .annotate(
             tickets_available=(
-                F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
-                - Count("tickets")
+                    F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
+                    - Count("tickets")
             )
         )
     )
@@ -82,7 +86,40 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
 
+        date = self.request.query_params.get("date")
+        show_title = self.request.query_params.get("show_title")
+
+        if date:
+            try:
+                date = datetime.strptime(date, "%Y-%m-%d").date()
+                queryset = queryset.filter(show_day=date)
+            except ValueError:
+                raise ValueError("Incorrect date format, should be YYYY-MM-DD")
+
+        if show_title:
+            queryset = queryset.filter(astronomy_show__title__icontains=show_title)
+
         return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "show_title",
+                type=OpenApiTypes.INT,
+                description="Filter by astronomy_show_title (ex. ?show_title=title)",
+            ),
+            OpenApiParameter(
+                "date",
+                type=OpenApiTypes.DATE,
+                description=(
+                        "Filter by date of ShowSession "
+                        "(ex. ?date=2022-10-23)"
+                ),
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class ShowSpeakerViewSet(viewsets.ModelViewSet):
