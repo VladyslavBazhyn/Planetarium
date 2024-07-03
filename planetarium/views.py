@@ -50,9 +50,15 @@ class ShowThemeViewSet(viewsets.ModelViewSet):
         return serializer_class
 
 
+class ShowSessionPagination(PageNumberPagination):
+    page_size = 5
+    max_page_size = 30
+
+
 class ShowSessionViewSet(viewsets.ModelViewSet):
     queryset = ShowSession.objects.all().select_related()
     serializer_class = ShowSessionSerializer
+    pagination_class = ShowSessionPagination
 
     def get_serializer_class(self):
         serializer_class = self.serializer_class
