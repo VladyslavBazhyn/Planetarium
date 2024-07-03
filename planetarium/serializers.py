@@ -87,11 +87,31 @@ class AstronomyShowListSerializer(AstronomyShowSerializer):
         slug_field="name"
     )
 
+    class Meta:
+        model = AstronomyShow
+        fields = (
+            "title",
+            "show_themes",
+            "poster",
+        )
+
     def create(self, validated_data):
         show_themes = validated_data.pop("show_themes")
         astronomy_show = AstronomyShow.objects.create(**validated_data)
         astronomy_show.show_themes.set(show_themes)
         return astronomy_show
+
+
+class AstronomyShowDetailSerializer(AstronomyShowSerializer):
+    class Meta:
+        model = AstronomyShow
+        fields = (
+            "id",
+            "title",
+            "description",
+            "poster",
+            "show_themes",
+        )
 
 
 class AstronomyShowPosterSerializer(serializers.ModelSerializer):
