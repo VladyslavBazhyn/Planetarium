@@ -145,6 +145,7 @@ class ShowSessionSerializer(serializers.ModelSerializer):
         queryset=ShowSpeaker.objects.all(),
         many=True
     )
+    tickets_available = serializers.IntegerField(read_only=True)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -160,7 +161,8 @@ class ShowSessionSerializer(serializers.ModelSerializer):
             "show_speakers",
             "show_day",
             "time_start",
-            "time_end"
+            "time_end",
+            "tickets_available"
         )
 
     def create(self, validated_data):
@@ -193,6 +195,7 @@ class ShowSessionListSerializer(ShowSessionSerializer):
             "time_start",
             "time_end",
             "show_speakers",
+            "tickets_available"
         )
 
     def to_representation(self, instance):

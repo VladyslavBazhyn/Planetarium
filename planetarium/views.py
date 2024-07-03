@@ -1,3 +1,4 @@
+from django.db.models import F, Count
 from rest_framework import viewsets, mixins, status
 from django.shortcuts import render
 from rest_framework.pagination import PageNumberPagination
@@ -56,7 +57,16 @@ class ShowSessionPagination(PageNumberPagination):
 
 
 class ShowSessionViewSet(viewsets.ModelViewSet):
-    queryset = ShowSession.objects.all().select_related()
+    queryset = (
+        ShowSession.objects.all()
+        .select_related("astronomy_show", "planetarium_dome")
+        .annotate(
+            tickets_available=(
+                F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
+                - Count("tickets")
+            )
+        )
+    )
     serializer_class = ShowSessionSerializer
     pagination_class = ShowSessionPagination
 
@@ -68,6 +78,11 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
             serializer_class = ShowSessionDetailSerializer
 
         return serializer_class
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        return queryset
 
 
 class ShowSpeakerViewSet(viewsets.ModelViewSet):
