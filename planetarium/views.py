@@ -24,18 +24,11 @@ from planetarium.serializers import (
     ShowSpeakerSerializer,
     TicketSerializer,
     ReservationSerializer,
-    AstronomyShowSerializer,
     AstronomyShowPosterSerializer, ReservationListSerializer, ReservationDetailSerializer, ShowSpeakerListSerializer,
     ShowSpeakerDetailSerializer, ShowThemeListSerializer, ShowThemeDetailSerializer, ShowSessionListSerializer,
     ShowSessionDetailSerializer, AstronomyShowListSerializer, AstronomyShowDetailSerializer
 )
 
-
-# [
-#     showspeakerlistserializer,
-# AstronomyShowListSerializer,
-# AstronomyShowSerializer(usual with slugfields instead of full serializer)
-# ]
 
 class PlanetariumDomeViewSet(viewsets.ModelViewSet):
     queryset = PlanetariumDome.objects.all()
@@ -55,11 +48,9 @@ class PlanetariumDomeViewSet(viewsets.ModelViewSet):
                     )
                 ).filter(total_capacity__gte=capacity)
             except ValueError:
-                pass  # Handle the case where capacity is not a valid integer
+                pass  # If capacity not a valid value - do nothing
 
         return queryset
-
-
 
     @extend_schema(
         parameters=[
@@ -283,3 +274,25 @@ class AstronomyShowViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             serializer_class = AstronomyShowDetailSerializer
         return serializer_class
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        title = self.request.query_params.get("title")
+
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+
+        return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="title",
+                type=OpenApiTypes.STR,
+                description="Filter by astronomy show titles (ex. ?title=some title here)"
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
