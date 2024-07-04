@@ -55,6 +55,28 @@ class ShowThemeViewSet(viewsets.ModelViewSet):
 
         return serializer_class
 
+    def get_queryset(self):
+        queryset = self.queryset
+
+        name = self.request.query_params.get("name")
+
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="name",
+                type=OpenApiTypes.STR,
+                description="Find show theme by name (ex. ?name=name)"
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class ShowSessionPagination(PageNumberPagination):
     page_size = 5
