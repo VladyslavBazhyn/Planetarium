@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from django.db.models import F, Count
+from django.db.models import F, Count, Value, CharField
+from django.db.models.functions import Concat
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins, status
@@ -105,7 +106,7 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
         parameters=[
             OpenApiParameter(
                 "show_title",
-                type=OpenApiTypes.INT,
+                type=OpenApiTypes.STR,
                 description="Filter by astronomy_show_title (ex. ?show_title=title)",
             ),
             OpenApiParameter(
@@ -134,6 +135,41 @@ class ShowSpeakerViewSet(viewsets.ModelViewSet):
             serializer_class = ShowSpeakerDetailSerializer
 
         return serializer_class
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        first_name = self.request.query_params.get("first_name")
+        last_name = self.request.query_params.get("last_name")
+        profession = self.request.query_params.get("profession")
+
+        if first_name:
+            queryset = queryset.filter(first_name__icontains=first_name)
+
+        if last_name:
+            queryset = queryset.filter(last_name__icontains=last_name)
+
+        if profession:
+            queryset = queryset.filter(profession__icontains=profession)
+
+        return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="name",
+                type=OpenApiTypes.STR,
+                description="Filter by show speaker full_name (ex. ?name=name)"
+            ),
+            OpenApiParameter(
+                name="profession",
+                type=OpenApiTypes.STR,
+                description="Filter by show speaker profession (ex. ?profession=profession)"
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class TicketSerializerViewSet(viewsets.ModelViewSet):
