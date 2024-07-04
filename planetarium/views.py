@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import F, Count, Value, CharField
+from django.db.models import F, Count, Value, CharField, ExpressionWrapper, IntegerField
 from django.db.models.functions import Concat
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -40,6 +40,38 @@ from planetarium.serializers import (
 class PlanetariumDomeViewSet(viewsets.ModelViewSet):
     queryset = PlanetariumDome.objects.all()
     serializer_class = PlanetariumDomeSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        capacity = self.request.query_params.get("capacity")
+
+        if capacity:
+            try:
+                queryset = queryset.annotate(
+                    total_capacity=ExpressionWrapper(
+                        F("rows") * F("seats_in_row"),
+                        output_field=IntegerField()
+                    )
+                ).filter(total_capacity__gte=capacity)
+            except ValueError:
+                pass  # Handle the case where capacity is not a valid integer
+
+        return queryset
+
+
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="capacity",
+                type=OpenApiTypes.INT,
+                description="Searching by planetarium dome capacity (ex. ?capacity=int)"
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class ShowThemeViewSet(viewsets.ModelViewSet):
