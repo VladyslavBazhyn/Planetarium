@@ -37,9 +37,9 @@ class PlanetariumDomeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
 
-        capacity = self.request.query_params.get("capacity")
+        capacity = self.request.query_params.get("capacity", None)
 
-        if capacity:
+        if capacity is not None:
             try:
                 queryset = queryset.annotate(
                     total_capacity=ExpressionWrapper(
