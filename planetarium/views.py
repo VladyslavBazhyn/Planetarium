@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import F, Count, Value, CharField, ExpressionWrapper, IntegerField
+from django.db.models import F, Count, Value, CharField, ExpressionWrapper, IntegerField, Prefetch
 from django.db.models.functions import Concat
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -109,7 +109,10 @@ class ShowSessionPagination(PageNumberPagination):
 class ShowSessionViewSet(viewsets.ModelViewSet):
     queryset = (
         ShowSession.objects.all()
-        .select_related("astronomy_show", "planetarium_dome")
+        .select_related(
+            "astronomy_show",
+            "planetarium_dome"
+        )
         .annotate(
             tickets_available=(
                     F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
@@ -228,7 +231,7 @@ class ReservationPagination(PageNumberPagination):
 
 
 class ReservationViewSet(viewsets.ModelViewSet):
-    queryset = Reservation.objects.all().select_related()
+    queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
     pagination_class = ReservationPagination
 
@@ -253,7 +256,18 @@ class ReservationViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = (
+            self.queryset.select_related("user")
+            .prefetch_related(
+                Prefetch(
+                    "tickets",
+                    queryset=Ticket.objects.select_related(
+                        "show_session__astronomy_show",
+                        "show_session__planetarium_dome"
+                    )
+                )
+            )
+        )
 
         show_title = self.request.query_params.get("show_title")
 
