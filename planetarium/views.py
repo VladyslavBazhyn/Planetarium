@@ -6,7 +6,9 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins, status
 from django.shortcuts import render
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 from planetarium.models import (
     PlanetariumDome,
@@ -278,15 +280,19 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
 
 class AstronomyShowViewSet(viewsets.ModelViewSet):
-    queryset = AstronomyShow.objects.all()
+    queryset = AstronomyShow.objects.prefetch_related(
+        "show_themes"
+    )
     serializer_class = AstronomyShowListSerializer
 
     def get_serializer_class(self):
         serializer_class = self.serializer_class
         if self.action == "list":
             serializer_class = AstronomyShowListSerializer
-        if self.action == "retrieve":
+        elif self.action == "retrieve":
             serializer_class = AstronomyShowDetailSerializer
+        elif self.action == "upload_poster":
+            return AstronomyShowPosterSerializer
         return serializer_class
 
     def get_queryset(self):
@@ -298,6 +304,22 @@ class AstronomyShowViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(title__icontains=title)
 
         return queryset
+
+    @action(
+        methods=["post"],
+        detail=True,
+        url_path="upload-poster",
+    )
+    def upload_poster(self, request, pk=None):
+
+        astronomy_show = self.get_object()
+        serializer = self.get_serializer(astronomy_show, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         parameters=[
