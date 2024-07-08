@@ -66,6 +66,9 @@ INTERNAL_IPS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PERMISSION_CLASSES": [
+        "planetarium.permissions.IsAdminOrIfAuthenticatedReadOnly",
+    ],
     # "DEFAULT_THROTTLE_CLASSES": [
     #     "rest_framework.throttling.AnonRateThrottle",
     #     "rest_framework.throttling.UserRateThrottle",
@@ -183,7 +186,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "ROTATE_REFRESH_TOKENS": False,
 }
