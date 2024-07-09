@@ -41,7 +41,7 @@ class AstronomyShow(models.Model):
     )
     show_themes = models.ManyToManyField(
         ShowTheme,
-        related_name="show_themes",
+        related_name="show_themes"
     )
 
     class Meta:
