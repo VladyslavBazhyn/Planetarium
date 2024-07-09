@@ -279,7 +279,8 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = (
-            "id", "created_at", "tickets", "astronomy_show_title", "taken_places"
+            "id", "created_at", "tickets",
+            "astronomy_show_title", "taken_places"
         )
 
     def create(self, validated_data):
@@ -297,11 +298,8 @@ class ReservationSerializer(serializers.ModelSerializer):
         return None
 
     def get_taken_places(self, obj):
-        show_session = obj.tickets.first().show_session
-        if show_session:
-            taken_places = show_session.tickets.all()
-            return TicketSeatsSerializer(taken_places, many=True).data
-        return []
+        taken_places = obj.tickets.all()
+        return TicketSeatsSerializer(taken_places, many=True).data
 
 
 class ReservationDetailSerializer(ReservationSerializer):
@@ -313,10 +311,10 @@ class ReservationDetailSerializer(ReservationSerializer):
         model = Reservation
         fields = (
             "id",
-            "astronomy_show_title",
+            # "astronomy_show_title",
             "show_session_date",
             "show_session_time_start",
-            "taken_places",
+            # "taken_places",
             "show_session_speakers",
             "created_at"
         )
@@ -342,7 +340,7 @@ class ReservationDetailSerializer(ReservationSerializer):
 
 
 class ReservationListSerializer(ReservationSerializer):
-    taken_places = serializers.SerializerMethodField()
+    # taken_places = serializers.SerializerMethodField()
 
     class Meta:
         model = Reservation

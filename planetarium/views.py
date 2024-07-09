@@ -115,6 +115,9 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
             "astronomy_show",
             "planetarium_dome"
         )
+        .prefetch_related(
+            "show_speakers"
+        )
         .annotate(
             tickets_available=(
                     F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
@@ -264,6 +267,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 Prefetch(
                     "tickets",
                     queryset=Ticket.objects.select_related(
+                        "show_session",
                         "show_session__astronomy_show",
                         "show_session__planetarium_dome"
                     )
@@ -319,7 +323,7 @@ class AstronomyShowViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         parameters=[
