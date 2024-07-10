@@ -9,11 +9,30 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from planetarium.models import PlanetariumDome, ShowTheme, AstronomyShow, ShowSession
-from planetarium.serializers import AstronomyShowSerializer, AstronomyShowListSerializer, AstronomyShowDetailSerializer
+from planetarium.models import ShowTheme, AstronomyShow, ShowSession, PlanetariumDome
+from planetarium.serializers import AstronomyShowListSerializer, AstronomyShowDetailSerializer
 
 ASTRONOMY_SHOW_URL = reverse("planetarium:astronomyshow-list")
-SHOW_SESSION_URL = reverse("planetarium:showsession-list")
+
+
+def sample_show_session(**parameters):
+    planetarium_dome = PlanetariumDome.objects.create(
+        name="BIG", rows=10, seats_in_row=10
+    )
+
+    astronomy_show = sample_astronomy_show()
+
+    default_data = {
+        "planetarium_dome": planetarium_dome,
+        "astronomy_show": astronomy_show,
+        "show_day": "2025-01-01",
+        "time_start": "14:00:00",
+        "time_end": "15:00:00"
+    }
+
+    default_data.update(parameters)
+
+    return ShowSession.objects.create(**default_data)
 
 
 def sample_astronomy_show(show_name=None, **def_param):
@@ -36,25 +55,6 @@ def sample_astronomy_show(show_name=None, **def_param):
     astronomy_show.show_themes.add(show_theme)
 
     return astronomy_show
-
-
-def sample_show_session(**parameters):
-    planetarium_dome = PlanetariumDome.objects.create(
-        name="BIG", rows=10, seats_in_row=10
-    )
-    astronomy_show = sample_astronomy_show()
-
-    default_data = {
-        "planetarium_dome": planetarium_dome,
-        "astronomy_show": astronomy_show,
-        "show_day": "2025-01-01",
-        "time_start": "14:00:00",
-        "time_end": "15:00:00"
-    }
-
-    default_data.update(parameters)
-
-    return ShowSession.objects.create(**default_data)
 
 
 def poster_upload_url(astronomy_show_id: int):
@@ -96,11 +96,14 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(str(sample), sample.title)
 
     def test_astronomy_show_retrieve_list_and_list_ordering(self):
-        sample_astronomy_show(title="Atitle", show_name="First")
-        sample_astronomy_show(title="BTitle", show_name="Second")
-        sample_astronomy_show(title="CTitle", show_name="Third")
+        sample_astronomy_show(title="1_Atitle", show_name="First")
+        sample_astronomy_show(title="1_BTitle", show_name="Second")
+        sample_astronomy_show(title="1_CTitle", show_name="Third")
 
-        res = self.client.get(ASTRONOMY_SHOW_URL)
+        res = self.client.get(
+            ASTRONOMY_SHOW_URL,
+            {"title": "1"}
+        )
 
         astronomy_shows = AstronomyShow.objects.all().order_by("title")
         serializer = AstronomyShowListSerializer(astronomy_shows, many=True)
