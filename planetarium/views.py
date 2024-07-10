@@ -19,6 +19,7 @@ from planetarium.models import (
     Ticket,
     Reservation
 )
+from planetarium.permissions import IsAdminOrIfAuthenticatedReadOnly
 from planetarium.serializers import (
     PlanetariumDomeSerializer,
     ShowThemeSerializer,

@@ -36,6 +36,7 @@ class AstronomyShow(models.Model):
     title = models.CharField(max_length=30, unique=True)
     description = models.TextField()
     poster = models.ImageField(
+        blank=True,
         null=True,
         upload_to=astronomy_show_image_file_path
     )

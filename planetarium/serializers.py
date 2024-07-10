@@ -97,6 +97,7 @@ class AstronomyShowListSerializer(AstronomyShowSerializer):
 
     def create(self, validated_data):
         show_themes = validated_data.pop("show_themes")
+        validated_data.pop("poster")
         astronomy_show = AstronomyShow.objects.create(**validated_data)
         astronomy_show.show_themes.set(show_themes)
         return astronomy_show
@@ -184,7 +185,6 @@ class ShowSessionListSerializer(ShowSessionSerializer):
         slug_field="name",
         queryset=PlanetariumDome.objects.all(),
     )
-    # show_speakers = ShowSpeakerListSerializer(many=True)
 
     class Meta:
         model = ShowSession

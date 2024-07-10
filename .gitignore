@@ -8,3 +8,4 @@ Dairy
 *.exe
 .env
 .dockerignore
+media

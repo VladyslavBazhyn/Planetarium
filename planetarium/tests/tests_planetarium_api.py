@@ -185,7 +185,7 @@ class AstronomyShowPosterUploadTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_post_image_to_movie_list_should_not_work(self):
+    def test_post_poster_to_astronomy_show_list_should_not_work(self):
         url = ASTRONOMY_SHOW_URL
         with tempfile.NamedTemporaryFile(suffix=".jpg") as ntf:
             img = Image.new("RGB", (10, 10))
@@ -194,16 +194,45 @@ class AstronomyShowPosterUploadTest(TestCase):
             res = self.client.post(
                 url,
                 {
-                    "title": "some_title",
+                    "title": "some_title_1",
                     "description": "some_description",
-                    "image": ntf,
+                    "poster": ntf,
                 },
                 format="multipart",
             )
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        astronomy_show = AstronomyShow.objects.get(title="some_title")
+        astronomy_show = AstronomyShow.objects.get(title="some_title_1")
         self.assertFalse(astronomy_show.poster)
 
     def test_poster_url_is_shown_on_astronomy_show_detail(self):
-        pass
+        url = poster_upload_url(self.astronomy_show.id)
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as ntf:
+            img = Image.new("RGB", (10, 10))
+            img.save(ntf, format="JPEG")
+            ntf.seek(0)
+            res = self.client.post(
+                url,
+                {
+                    "poster": ntf,
+                },
+                format="multipart",
+            )
+            self.assertIn("poster", res.data)
+
+    def test_poster_url_is_shown_on_astronomy_show_list(self):
+        url = poster_upload_url(self.astronomy_show.id)
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as ntf:
+            img = Image.new("RGB", (10, 10))
+            img.save(ntf, format="JPEG")
+            ntf.seek(0)
+            self.client.post(
+                url,
+                {
+                    "poster": ntf,
+                },
+                format="multipart",
+            )
+            res = self.client.get(ASTRONOMY_SHOW_URL)
+
+            self.assertIn("poster", res.data[0].keys())
