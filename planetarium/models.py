@@ -29,11 +29,18 @@ class ShowSpeaker(models.Model):
 
 
 class ShowTheme(models.Model):
-    name = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=30,
+                            unique=True
+                            )
+
+    def __str__(self):
+        return self.name
 
 
 class AstronomyShow(models.Model):
-    title = models.CharField(max_length=30, unique=True)
+    title = models.CharField(max_length=30,
+                             unique=True
+                             )
     description = models.TextField()
     poster = models.ImageField(
         blank=True,
@@ -86,7 +93,11 @@ class ShowSession(models.Model):
     time_end = models.TimeField()
 
     class Meta:
-        ordering = ["-show_day", "-time_start", "-time_end"]
+        ordering = [
+            "-show_day",
+            "-time_start",
+            "-time_end"
+        ]
 
     @staticmethod
     def validate_show_speakers(show_speakers, show_day, time_start, time_end):

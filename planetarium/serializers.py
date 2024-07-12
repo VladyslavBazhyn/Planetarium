@@ -292,7 +292,10 @@ class ReservationSerializer(serializers.ModelSerializer):
             return reservation
 
     def get_astronomy_show_title(self, obj):
-        show_session = obj.tickets.first().show_session
+        try:
+            show_session = obj.tickets.show_session
+        except AttributeError:
+            show_session = None
         if show_session and show_session.astronomy_show:
             return show_session.astronomy_show.title
         return None

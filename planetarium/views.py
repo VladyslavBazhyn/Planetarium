@@ -106,7 +106,7 @@ class ShowThemeViewSet(viewsets.ModelViewSet):
 
 class ShowSessionPagination(PageNumberPagination):
     page_size = 5
-    max_page_size = 30
+    max_page_size = 10
 
 
 class ShowSessionViewSet(viewsets.ModelViewSet):
@@ -285,9 +285,9 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
 
 class AstronomyShowViewSet(viewsets.ModelViewSet):
-    queryset = AstronomyShow.objects.prefetch_related(
+    queryset = (AstronomyShow.objects.prefetch_related(
         "show_themes"
-    )
+    ))
     serializer_class = AstronomyShowListSerializer
 
     def get_serializer_class(self):
