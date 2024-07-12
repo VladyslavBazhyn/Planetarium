@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from planetarium.models import PlanetariumDome, ShowSession, ShowTheme, AstronomyShow, ShowSpeaker
-from planetarium.serializers import ShowSessionListSerializer
+from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer
 
 SHOW_SESSION_URL = reverse("planetarium:showsession-list")
 
@@ -102,6 +102,13 @@ def sample_show_session(**parameters):
     show_session.show_speakers.add(show_speaker)
 
     return show_session
+
+
+def detail_url(show_session_id):
+    return reverse(
+        "planetarium:showsession-detail",
+        args=[show_session_id]
+    )
 
 
 class UnauthenticatedUserPlanetariumApiTest(TestCase):
@@ -214,3 +221,30 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data["results"], serializer.data)
+
+    def test_show_session_retrieve_detail(self):
+        sample = sample_show_session()
+
+        url = detail_url(sample.id)
+        res = self.client.get(url)
+
+        show_session = ShowSession.objects.annotate(
+            tickets_available=(
+                    F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
+                    - Count("tickets")
+            )
+        ).get(pk=sample.id)
+
+        serializer = ShowSessionDetailSerializer(show_session)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_show_session_create_forbidden(self):
+        payload = {
+            "show_day": "2025-03-03"
+        }
+
+        res = self.client.post(SHOW_SESSION_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
