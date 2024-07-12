@@ -1,5 +1,3 @@
-import os
-
 from django.contrib.auth import get_user_model
 from django.db.models import F, Count
 from django.test import TestCase
@@ -157,7 +155,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
             tickets_available=(
                     F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
                     - Count("tickets"))
-            )
+            ).order_by("-show_day", "-time_start", "-time_end")
 
         serializer = ShowSessionListSerializer(show_sessions, many=True)
 
@@ -180,7 +178,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         )
 
         show_session_3 = sample_show_session(
-            show_day="2025-01-02",
+            show_day="2025-01-03",
             time_start="12:00:00",
             time_end="13:00:00",
             astronomy_show=sample_astronomy_show(show_theme_name="Test_second", title="C_second_title"),
@@ -191,7 +189,9 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
             {"show_title": "2"}
         )
 
-        queryset = ShowSession.objects.filter(
+        queryset = ShowSession.objects.order_by(
+            "-show_day", "-time_start", "-time_end"
+        ).filter(
             astronomy_show__title__icontains="2"
         ).annotate(
             tickets_available=(

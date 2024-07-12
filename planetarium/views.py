@@ -154,7 +154,7 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
         if show_title:
             queryset = queryset.filter(astronomy_show__title__icontains=show_title)
 
-        return queryset
+        return queryset.order_by("-show_day", "-time_start", "-time_end")
 
     @extend_schema(
         parameters=[
