@@ -173,6 +173,18 @@ class ShowSessionSerializer(serializers.ModelSerializer):
             show_session.show_speakers.set(show_speakers)
         return show_session
 
+    def validate(self, data):
+        show_speakers = data.get("show_speakers", [])
+        show_day = data.get("show_day")
+        time_start = data.get("time_start")
+        time_end = data.get("time_end")
+
+        ShowSession.validate_show_speakers(
+            show_speakers, show_day, time_start, time_end
+        )
+
+        return data
+
 
 class ShowSessionListSerializer(ShowSessionSerializer):
     astronomy_show = serializers.SlugRelatedField(
@@ -202,18 +214,6 @@ class ShowSessionListSerializer(ShowSessionSerializer):
         representation = super().to_representation(instance)
         representation["show_speakers"] = ShowSpeakerListSerializer(instance.show_speakers, many=True).data
         return representation
-
-    def validate(self, data):
-        show_speakers = data.get("show_speakers", [])
-        show_day = data.get("show_day")
-        time_start = data.get("time_start")
-        time_end = data.get("time_end")
-
-        ShowSession.validate_show_speakers(
-            show_speakers, show_day, time_start, time_end
-        )
-
-        return data
 
 
 class ShowSessionDetailSerializer(ShowSessionSerializer):

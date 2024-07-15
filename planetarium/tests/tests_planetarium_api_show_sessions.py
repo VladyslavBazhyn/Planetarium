@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import F, Count
 from django.test import TestCase
 from django.urls import reverse
@@ -7,7 +10,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from planetarium.models import PlanetariumDome, ShowSession, ShowTheme, AstronomyShow, ShowSpeaker
-from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer
+from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer, ShowSessionSerializer
 
 SHOW_SESSION_URL = reverse("planetarium:showsession-list")
 
@@ -97,6 +100,13 @@ def sample_show_session(**parameters):
 
     show_session = ShowSession.objects.create(**default_data)
 
+    ShowSession.validate_show_speakers(
+        [show_speaker],
+        datetime.strptime(show_session.show_day, "%Y-%m-%d").date(),
+        datetime.strptime(show_session.time_start, "%H:%M:%S").time(),
+        datetime.strptime(show_session.time_end, "%H:%M:%S").time()
+    )
+
     show_session.show_speakers.add(show_speaker)
 
     return show_session
@@ -155,7 +165,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
             tickets_available=(
                     F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
                     - Count("tickets"))
-            ).order_by("-show_day", "-time_start", "-time_end")
+        ).order_by("-show_day", "-time_start", "-time_end")
 
         serializer = ShowSessionListSerializer(show_sessions, many=True)
 
@@ -248,3 +258,29 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         res = self.client.post(SHOW_SESSION_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_show_session_with_one_speaker_in_same_time_forbidden(self):
+        """
+        Test whether validation of show speakers
+        working time validate correctly. To prevent creating
+        two different show session for one speaker at the same time
+        """
+
+        astronomy_show = sample_astronomy_show()
+        show_speaker = sample_show_speaker()
+
+        show_session_1 = sample_show_session(
+            show_speaker=show_speaker,
+            astronomy_show=astronomy_show,
+            show_day="2025-01-01",
+            time_start="14:00:00",
+            time_end="15:00:00"
+        )
+        with self.assertRaises(ValidationError):
+            show_session_2 = sample_show_session(
+                show_speaker=show_speaker,
+                astronomy_show=astronomy_show,
+                show_day="2025-01-01",
+                time_start="14:00:00",
+                time_end="15:00:00"
+            )

@@ -108,7 +108,7 @@ class ShowSession(models.Model):
             for other_show in other_speaker_shows:
                 if (
                         time_start <= other_show.time_start <= time_end or
-                        time_end >= other_show.time_end >= time_start
+                        time_start <= other_show.time_end <= time_end
                 ):
                     raise ValidationError(
                         f"Speaker {speaker.first_name} {speaker.last_name} "
@@ -116,14 +116,13 @@ class ShowSession(models.Model):
                     )
 
     def clean(self):
-        if self.pk:
-            self.validate_show_speakers(
-                self.show_speakers.all(), self.show_day, self.time_start, self.time_end
-            )
+        self.validate_show_speakers(
+            self.show_speakers.all(), self.show_day, self.time_start, self.time_end
+        )
 
     def save(self, *args, **kwargs):
-        self.clean()
         super(ShowSession, self).save(*args, **kwargs)
+        self.clean()
 
     def __str__(self):
         return f"{self.astronomy_show.title} {str(self.show_day)} at {self.time_start}"
@@ -173,9 +172,9 @@ class Ticket(models.Model):
                 raise error_to_raise(
                     {
                         ticket_attr_name: f"{ticket_attr_name} "
-                        f"number must be in available range: "
-                        f"(1, {planetarium_dome_attr_name}): "
-                        f"(1, {count_attrs})"
+                                          f"number must be in available range: "
+                                          f"(1, {planetarium_dome_attr_name}): "
+                                          f"(1, {count_attrs})"
                     }
                 )
 
@@ -188,11 +187,11 @@ class Ticket(models.Model):
         )
 
     def save(
-        self,
-        force_insert=False,
-        force_update=False,
-        using=None,
-        update_fields=None,
+            self,
+            force_insert=False,
+            force_update=False,
+            using=None,
+            update_fields=None,
     ):
         self.full_clean()
         return super(Ticket, self).save(
