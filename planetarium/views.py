@@ -211,9 +211,14 @@ class ShowSpeakerViewSet(viewsets.ModelViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                name="name",
+                name="first_name",
                 type=OpenApiTypes.STR,
-                description="Filter by show speaker full_name (ex. ?name=name)"
+                description="Filter by show speaker first_name (ex. ?first_name=name)"
+            ),
+            OpenApiParameter(
+                name="last_name",
+                type=OpenApiTypes.STR,
+                description="Filter by show speaker last_name (ex. ?last_name=name)"
             ),
             OpenApiParameter(
                 name="profession",
