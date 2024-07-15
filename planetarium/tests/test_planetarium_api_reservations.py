@@ -7,7 +7,8 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from planetarium.models import PlanetariumDome, ShowSession, ShowTheme, AstronomyShow, ShowSpeaker, Reservation, Ticket
-from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer, ReservationListSerializer
+from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer, ReservationListSerializer, \
+    ReservationDetailSerializer
 from planetarium.tests.tests_planetarium_api_show_session import sample_show_session, sample_astronomy_show
 
 RESERVATIONS_URL = reverse("planetarium:reservation-list")
@@ -22,6 +23,13 @@ def sample_reservation(**params):
     def_param.update(params)
 
     return Reservation.objects.create(**def_param)
+
+
+def detail_url(reservation_id):
+    return reverse(
+        "planetarium:reservation-detail",
+        args=[reservation_id]
+    )
 
 
 class UnauthenticatedUserPlanetariumApiTest(TestCase):
@@ -100,3 +108,37 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data["results"], serializer.data)
+
+    def test_reservation_retrieve_detail(self):
+        astronomy_show_1 = sample_astronomy_show(title="First", show_theme_name="2_test")
+        show_session_1 = sample_show_session(astronomy_show=astronomy_show_1)
+        reservation_1 = sample_reservation()
+        ticket_1 = Ticket.objects.create(
+            reservation=reservation_1,
+            show_session=show_session_1,
+            row=1,
+            seat=1
+        )
+
+        url = detail_url(reservation_1.id)
+        res = self.client.get(url)
+
+        reservation = Reservation.objects.get(pk=reservation_1.id)
+
+        serializer = ReservationDetailSerializer(reservation)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_reservation_create_forbidden(self):
+
+        astronomy_show_1 = sample_astronomy_show(title="First", show_theme_name="2_test")
+
+        payload = {
+            "astronomy_show": astronomy_show_1
+        }
+
+        res = self.client.post(RESERVATIONS_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
