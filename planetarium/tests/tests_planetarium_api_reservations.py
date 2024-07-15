@@ -9,7 +9,7 @@ from rest_framework import status
 from planetarium.models import PlanetariumDome, ShowSession, ShowTheme, AstronomyShow, ShowSpeaker, Reservation, Ticket
 from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer, ReservationListSerializer, \
     ReservationDetailSerializer
-from planetarium.tests.tests_planetarium_api_show_session import sample_show_session, sample_astronomy_show
+from planetarium.tests.tests_planetarium_api_show_sessions import sample_show_session, sample_astronomy_show
 
 RESERVATIONS_URL = reverse("planetarium:reservation-list")
 
