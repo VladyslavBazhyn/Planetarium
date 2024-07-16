@@ -50,30 +50,42 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
 
         res = self.client.get(RESERVATIONS_URL)
 
-        reservations = Reservation.objects.all().order_by("-created_at")
+        reservations = Reservation.objects.all().order_by(
+            "-created_at"
+        )
 
-        serializer = ReservationListSerializer(reservations, many=True)
+        serializer = ReservationListSerializer(
+            reservations, many=True
+        )
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data["results"], serializer.data)
 
     def test_reservation_filter_by_show_session_title(self):
-        astronomy_show_1 = sample_astronomy_show(title="First", show_theme_name="2_test")
-        astronomy_show_2 = sample_astronomy_show(title="Second", show_theme_name="1_test")
+        astronomy_show_1 = sample_astronomy_show(
+            title="First", show_theme_name="2_test"
+        )
+        astronomy_show_2 = sample_astronomy_show(
+            title="Second", show_theme_name="1_test"
+        )
 
-        show_session_1 = sample_show_session(astronomy_show=astronomy_show_1)
-        show_session_2 = sample_show_session(astronomy_show=astronomy_show_2)
+        show_session_1 = sample_show_session(
+            astronomy_show=astronomy_show_1
+        )
+        show_session_2 = sample_show_session(
+            astronomy_show=astronomy_show_2
+        )
 
         reservation_1 = sample_reservation()
         reservation_2 = sample_reservation()
 
-        ticket_1 = Ticket.objects.create(
+        Ticket.objects.create(
             reservation=reservation_1,
             show_session=show_session_1,
             row=1,
             seat=1
         )
-        ticket_2 = Ticket.objects.create(
+        Ticket.objects.create(
             reservation=reservation_2,
             show_session=show_session_2,
             row=1,
@@ -95,10 +107,14 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data["results"], serializer.data)
 
     def test_reservation_retrieve_detail(self):
-        astronomy_show_1 = sample_astronomy_show(title="First", show_theme_name="2_test")
-        show_session_1 = sample_show_session(astronomy_show=astronomy_show_1)
+        astronomy_show_1 = sample_astronomy_show(
+            title="First", show_theme_name="2_test"
+        )
+        show_session_1 = sample_show_session(
+            astronomy_show=astronomy_show_1
+        )
         reservation_1 = sample_reservation()
-        ticket_1 = Ticket.objects.create(
+        Ticket.objects.create(
             reservation=reservation_1,
             show_session=show_session_1,
             row=1,
@@ -117,7 +133,9 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
 
     def test_reservation_create_forbidden(self):
 
-        astronomy_show_1 = sample_astronomy_show(title="First", show_theme_name="2_test")
+        astronomy_show_1 = sample_astronomy_show(
+            title="First", show_theme_name="2_test"
+        )
 
         payload = {
             "astronomy_show": astronomy_show_1

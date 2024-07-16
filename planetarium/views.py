@@ -1,11 +1,15 @@
 from datetime import datetime
 
-from django.db.models import F, Count, Value, CharField, ExpressionWrapper, IntegerField, Prefetch
-from django.db.models.functions import Concat
+from django.db.models import (
+    F,
+    Count,
+    ExpressionWrapper,
+    IntegerField,
+    Prefetch
+)
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import viewsets, mixins, status
-from django.shortcuts import render
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -19,7 +23,6 @@ from planetarium.models import (
     Ticket,
     Reservation
 )
-from planetarium.permissions import IsAdminOrIfAuthenticatedReadOnly
 from planetarium.serializers import (
     PlanetariumDomeSerializer,
     ShowThemeSerializer,
@@ -27,9 +30,17 @@ from planetarium.serializers import (
     ShowSpeakerSerializer,
     TicketSerializer,
     ReservationSerializer,
-    AstronomyShowPosterSerializer, ReservationListSerializer, ReservationDetailSerializer, ShowSpeakerListSerializer,
-    ShowSpeakerDetailSerializer, ShowThemeListSerializer, ShowThemeDetailSerializer, ShowSessionListSerializer,
-    ShowSessionDetailSerializer, AstronomyShowListSerializer, AstronomyShowDetailSerializer
+    AstronomyShowPosterSerializer,
+    ReservationListSerializer,
+    ReservationDetailSerializer,
+    ShowSpeakerListSerializer,
+    ShowSpeakerDetailSerializer,
+    ShowThemeListSerializer,
+    ShowThemeDetailSerializer,
+    ShowSessionListSerializer,
+    ShowSessionDetailSerializer,
+    AstronomyShowListSerializer,
+    AstronomyShowDetailSerializer
 )
 
 
@@ -60,7 +71,9 @@ class PlanetariumDomeViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="capacity",
                 type=OpenApiTypes.INT,
-                description="Searching by planetarium dome capacity (ex. ?capacity=int)"
+                description=(
+                    "Searching by dome capacity (ex. ?capacity=int)"
+                )
             )
         ]
     )
@@ -121,7 +134,8 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
         )
         .annotate(
             tickets_available=(
-                    F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
+                    F("planetarium_dome__rows")
+                    * F("planetarium_dome__seats_in_row")
                     - Count("tickets")
             )
         )
@@ -149,10 +163,14 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
                 date = datetime.strptime(date, "%Y-%m-%d").date()
                 queryset = queryset.filter(show_day=date)
             except ValueError:
-                raise ValueError("Incorrect date format, should be YYYY-MM-DD")
+                raise ValueError(
+                    "Incorrect date format, should be YYYY-MM-DD"
+                )
 
         if show_title:
-            queryset = queryset.filter(astronomy_show__title__icontains=show_title)
+            queryset = queryset.filter(
+                astronomy_show__title__icontains=show_title
+            )
 
         return queryset.order_by("-show_day", "-time_start", "-time_end")
 
@@ -161,7 +179,9 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 "show_title",
                 type=OpenApiTypes.STR,
-                description="Filter by astronomy_show_title (ex. ?show_title=title)",
+                description=(
+                    "Filter by astronomy_show_title (ex. ?show_title=title)"
+                ),
             ),
             OpenApiParameter(
                 "date",
@@ -213,17 +233,23 @@ class ShowSpeakerViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="first_name",
                 type=OpenApiTypes.STR,
-                description="Filter by show speaker first_name (ex. ?first_name=name)"
+                description=(
+                    "Filter by show speaker first_name (ex. ?first_name=name)"
+                )
             ),
             OpenApiParameter(
                 name="last_name",
                 type=OpenApiTypes.STR,
-                description="Filter by show speaker last_name (ex. ?last_name=name)"
+                description=(
+                    "Filter by show speaker last_name (ex. ?last_name=name)"
+                )
             ),
             OpenApiParameter(
                 name="profession",
                 type=OpenApiTypes.STR,
-                description="Filter by show speaker profession (ex. ?profession=profession)"
+                description=(
+                    "Filter by speaker profession (ex. ?profession=profession)"
+                )
             ),
         ]
     )
@@ -251,7 +277,9 @@ class ReservationViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 "show_title",
                 type=OpenApiTypes.INT,
-                description="Filter by astronomy_show_title (ex. ?show_title=title)",
+                description=(
+                    "Filter by astronomy_show_title (ex. ?show_title=title)"
+                ),
             ),
         ]
     )
@@ -284,7 +312,9 @@ class ReservationViewSet(viewsets.ModelViewSet):
         show_title = self.request.query_params.get("show_title")
 
         if show_title:
-            queryset = queryset.filter(tickets__show_session__astronomy_show__title__icontains=show_title)
+            queryset = queryset.filter(
+                tickets__show_session__astronomy_show__title__icontains=show_title
+            )
 
         return queryset
 
@@ -336,7 +366,9 @@ class AstronomyShowViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="title",
                 type=OpenApiTypes.STR,
-                description="Filter by astronomy show titles (ex. ?title=some title here)"
+                description=(
+                    "Filter by astronomy show title (ex. ?title=title)"
+                )
             )
         ]
     )

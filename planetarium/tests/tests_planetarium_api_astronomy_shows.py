@@ -68,9 +68,15 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_astronomy_show_filter_by_title(self):
-        astronomy_show_1 = sample_astronomy_show(title="Atitle", show_theme_name="First")
-        astronomy_show_2 = sample_astronomy_show(title="BTitle", show_theme_name="Second")
-        astronomy_show_3 = sample_astronomy_show(title="CTi", show_theme_name="Third")
+        astronomy_show_1 = sample_astronomy_show(
+            title="Atitle", show_theme_name="First"
+        )
+        astronomy_show_2 = sample_astronomy_show(
+            title="BTitle", show_theme_name="Second"
+        )
+        astronomy_show_3 = sample_astronomy_show(
+            title="CTi", show_theme_name="Third"
+        )
 
         res = self.client.get(
             ASTRONOMY_SHOW_URL,
@@ -114,8 +120,12 @@ class AstronomyShowPosterUploadTest(TestCase):
             "admin@admin.com", "password"
         )
         self.client.force_authenticate(self.user)
-        self.astronomy_show = sample_astronomy_show(show_theme_name="First", title="Title_for_test")
-        self.show_session = sample_show_session(astronomy_show=self.astronomy_show)
+        self.astronomy_show = sample_astronomy_show(
+            show_theme_name="First", title="Title_for_test"
+        )
+        self.show_session = sample_show_session(
+            astronomy_show=self.astronomy_show
+        )
 
     def tearDown(self):
         self.astronomy_show.poster.delete()
@@ -125,7 +135,7 @@ class AstronomyShowPosterUploadTest(TestCase):
         url = poster_upload_url(self.astronomy_show.id)
         with tempfile.NamedTemporaryFile(suffix=".jpg")as ntf:
 
-            img = Image.new("RGB", (10,10))
+            img = Image.new("RGB", (10, 10))
             img.save(ntf, format="JPEG")
             ntf.seek(0)
 
@@ -140,7 +150,11 @@ class AstronomyShowPosterUploadTest(TestCase):
     def test_upload_poster_bad_request(self):
         """Test uploading an invalid image"""
         url = poster_upload_url(self.astronomy_show.id)
-        res = self.client.post(url, {"poster": "not a poster"}, format="multipart")
+        res = self.client.post(
+            url,
+            {"poster": "not a poster"},
+            format="multipart"
+        )
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 

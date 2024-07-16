@@ -118,7 +118,10 @@ class ShowSession(models.Model):
 
     def clean(self):
         self.validate_show_speakers(
-            self.show_speakers.all(), self.show_day, self.time_start, self.time_end
+            self.show_speakers.all(),
+            self.show_day,
+            self.time_start,
+            self.time_end
         )
 
     def save(self, *args, **kwargs):
@@ -126,7 +129,9 @@ class ShowSession(models.Model):
         self.clean()
 
     def __str__(self):
-        return f"{self.astronomy_show.title} {str(self.show_day)} at {self.time_start}"
+        return (f"{self.astronomy_show.title} "
+                f"{str(self.show_day)} at"
+                f" {self.time_start}")
 
 
 class Reservation(models.Model):
@@ -164,18 +169,26 @@ class Ticket(models.Model):
 
     @staticmethod
     def validate_ticket(row, seat, planetarium_dome, error_to_raise):
-        for ticket_attr_value, ticket_attr_name, planetarium_dome_attr_name in [
+        for (
+                ticket_attr_value,
+                ticket_attr_name,
+                planetarium_dome_attr_name
+        ) in [
             (row, "row", "rows"),
             (seat, "seat", "seats_in_row"),
         ]:
-            count_attrs = getattr(planetarium_dome, planetarium_dome_attr_name)
+            count_attrs = getattr(
+                planetarium_dome, planetarium_dome_attr_name
+            )
             if not (1 <= ticket_attr_value <= count_attrs):
                 raise error_to_raise(
                     {
-                        ticket_attr_name: f"{ticket_attr_name} "
-                                          f"number must be in available range: "
-                                          f"(1, {planetarium_dome_attr_name}): "
-                                          f"(1, {count_attrs})"
+                        ticket_attr_name: (
+                            f"{ticket_attr_name} "
+                            f"number must be in available range: "
+                            f"(1, {planetarium_dome_attr_name}): "
+                            f"(1, {count_attrs})"
+                        )
                     }
                 )
 

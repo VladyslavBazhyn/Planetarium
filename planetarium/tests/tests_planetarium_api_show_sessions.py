@@ -38,32 +38,39 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_show_session_retrieve_list_and_list_ordering(self):
-        show_session_1 = sample_show_session(
+        sample_show_session(
             show_day="2025-01-01",
             time_start="11:00:00",
             time_end="12:00:00",
-            astronomy_show=sample_astronomy_show(show_theme_name="2_Test_zero", title="zero_title"),
+            astronomy_show=sample_astronomy_show(
+                show_theme_name="2_Test_zero", title="zero_title"
+            ),
         )
 
-        show_session_2 = sample_show_session(
+        sample_show_session(
             show_day="2025-01-02",
             time_start="10:00:00",
             time_end="11:00:00",
-            astronomy_show=sample_astronomy_show(show_theme_name="2_Test_first", title="first_title"),
+            astronomy_show=sample_astronomy_show(
+                show_theme_name="2_Test_first", title="first_title"
+            ),
         )
 
-        show_session_3 = sample_show_session(
+        sample_show_session(
             show_day="2025-01-02",
             time_start="12:00:00",
             time_end="13:00:00",
-            astronomy_show=sample_astronomy_show(show_theme_name="2_Test_second", title="second_title"),
+            astronomy_show=sample_astronomy_show(
+                show_theme_name="2_Test_second", title="second_title"
+            ),
         )
 
         res = self.client.get(SHOW_SESSION_URL)
 
         show_sessions = ShowSession.objects.all().annotate(
             tickets_available=(
-                    F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
+                    F("planetarium_dome__rows") *
+                    F("planetarium_dome__seats_in_row")
                     - Count("tickets"))
         ).order_by("-show_day", "-time_start", "-time_end")
 
@@ -73,25 +80,31 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data["results"], serializer.data)
 
     def test_show_session_filters(self):
-        show_session_1 = sample_show_session(
+        sample_show_session(
             show_day="2025-01-01",
             time_start="11:00:00",
             time_end="12:00:00",
-            astronomy_show=sample_astronomy_show(show_theme_name="Test_zero", title="2_zero_title"),
+            astronomy_show=sample_astronomy_show(
+                show_theme_name="Test_zero", title="2_zero_title"
+            ),
         )
 
-        show_session_2 = sample_show_session(
+        sample_show_session(
             show_day="2025-01-02",
             time_start="10:00:00",
             time_end="11:00:00",
-            astronomy_show=sample_astronomy_show(show_theme_name="Test_first", title="2_first_title"),
+            astronomy_show=sample_astronomy_show(
+                show_theme_name="Test_first", title="2_first_title"
+            ),
         )
 
-        show_session_3 = sample_show_session(
+        sample_show_session(
             show_day="2025-01-03",
             time_start="12:00:00",
             time_end="13:00:00",
-            astronomy_show=sample_astronomy_show(show_theme_name="Test_second", title="C_second_title"),
+            astronomy_show=sample_astronomy_show(
+                show_theme_name="Test_second", title="C_second_title"
+            ),
         )
 
         res = self.client.get(
@@ -105,7 +118,8 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
             astronomy_show__title__icontains="2"
         ).annotate(
             tickets_available=(
-                    F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
+                    F("planetarium_dome__rows")
+                    * F("planetarium_dome__seats_in_row")
                     - Count("tickets")
             )
         )
@@ -123,7 +137,8 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
             show_day="2025-01-02"
         ).annotate(
             tickets_available=(
-                    F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
+                    F("planetarium_dome__rows")
+                    * F("planetarium_dome__seats_in_row")
                     - Count("tickets")
             )
         )
@@ -140,7 +155,8 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
 
         show_session = ShowSession.objects.annotate(
             tickets_available=(
-                    F("planetarium_dome__rows") * F("planetarium_dome__seats_in_row")
+                    F("planetarium_dome__rows")
+                    * F("planetarium_dome__seats_in_row")
                     - Count("tickets")
             )
         ).get(pk=sample.id)
@@ -169,7 +185,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         astronomy_show = sample_astronomy_show()
         show_speaker = sample_show_speaker()
 
-        show_session_1 = sample_show_session(
+        sample_show_session(
             show_speaker=show_speaker,
             astronomy_show=astronomy_show,
             show_day="2025-01-01",
@@ -177,7 +193,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
             time_end="15:00:00"
         )
         with self.assertRaises(ValidationError):
-            show_session_2 = sample_show_session(
+            sample_show_session(
                 show_speaker=show_speaker,
                 astronomy_show=astronomy_show,
                 show_day="2025-01-01",

@@ -6,7 +6,10 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from planetarium.models import ShowSpeaker
-from planetarium.serializers import ShowSpeakerListSerializer, ShowSpeakerDetailSerializer
+from planetarium.serializers import (
+    ShowSpeakerListSerializer,
+    ShowSpeakerDetailSerializer
+)
 from planetarium.tests.sample_functions import sample_show_speaker
 
 SHOW_SPEAKERS_ULR = reverse("planetarium:showspeaker-list")
@@ -53,9 +56,15 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         sample_show_speaker(last_name="Strong")
         sample_show_speaker(profession="Good Guy")
 
-        show_speaker_1 = ShowSpeaker.objects.filter(first_name="Second").first()
-        show_speaker_2 = ShowSpeaker.objects.filter(last_name="Strong").first()
-        show_speaker_3 = ShowSpeaker.objects.filter(profession="Good Guy").first()
+        show_speaker_1 = ShowSpeaker.objects.filter(
+            first_name="Second"
+        ).first()
+        show_speaker_2 = ShowSpeaker.objects.filter(
+            last_name="Strong"
+        ).first()
+        show_speaker_3 = ShowSpeaker.objects.filter(
+            profession="Good Guy"
+        ).first()
 
         res_1 = self.client.get(
             SHOW_SPEAKERS_ULR,
@@ -102,8 +111,6 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_show_speaker_create_forbidden(self):
-
-        show_speaker = sample_show_speaker()
 
         payload = {
             "first_name": "Bob",

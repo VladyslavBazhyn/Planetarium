@@ -150,7 +150,10 @@ class ShowSessionSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["show_speakers"] = ShowSpeakerSerializer(instance.show_speakers, many=True).data
+        representation["show_speakers"] = ShowSpeakerSerializer(
+            instance.show_speakers,
+            many=True
+        ).data
         return representation
 
     class Meta:
@@ -212,7 +215,10 @@ class ShowSessionListSerializer(ShowSessionSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["show_speakers"] = ShowSpeakerListSerializer(instance.show_speakers, many=True).data
+        representation["show_speakers"] = ShowSpeakerListSerializer(
+            instance.show_speakers,
+            many=True
+        ).data
         return representation
 
 
@@ -221,7 +227,10 @@ class ShowSessionDetailSerializer(ShowSessionSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
-    show_session = serializers.PrimaryKeyRelatedField(many=False, queryset=ShowSession.objects.all())
+    show_session = serializers.PrimaryKeyRelatedField(
+        many=False,
+        queryset=ShowSession.objects.all()
+    )
     row = serializers.IntegerField()
     seat = serializers.IntegerField()
 
