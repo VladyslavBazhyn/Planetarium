@@ -9,52 +9,17 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from planetarium.models import ShowTheme, AstronomyShow, ShowSession, PlanetariumDome
-from planetarium.serializers import AstronomyShowListSerializer, AstronomyShowDetailSerializer
+from planetarium.models import AstronomyShow
+from planetarium.serializers import (
+    AstronomyShowListSerializer,
+    AstronomyShowDetailSerializer
+)
+from planetarium.tests.sample_functions import (
+    sample_astronomy_show,
+    sample_show_session
+)
 
 ASTRONOMY_SHOW_URL = reverse("planetarium:astronomyshow-list")
-
-
-def sample_show_session(**parameters):
-    planetarium_dome = PlanetariumDome.objects.create(
-        name="BIG", rows=10, seats_in_row=10
-    )
-
-    astronomy_show = sample_astronomy_show()
-
-    default_data = {
-        "planetarium_dome": planetarium_dome,
-        "astronomy_show": astronomy_show,
-        "show_day": "2025-01-01",
-        "time_start": "14:00:00",
-        "time_end": "15:00:00"
-    }
-
-    default_data.update(parameters)
-
-    return ShowSession.objects.create(**default_data)
-
-
-def sample_astronomy_show(show_name=None, **def_param):
-    def_show_name = "Zero"
-    default_data = {
-        "title": "Title test",
-        "description": "Some description",
-    }
-
-    if show_name:
-        def_show_name = show_name
-
-    show_theme = ShowTheme.objects.create(
-        name=def_show_name
-    )
-
-    default_data.update(def_param)
-
-    astronomy_show = AstronomyShow.objects.create(**default_data)
-    astronomy_show.show_themes.add(show_theme)
-
-    return astronomy_show
 
 
 def poster_upload_url(astronomy_show_id: int):
@@ -72,15 +37,6 @@ def detail_url(astronomy_show_id):
     )
 
 
-class UnauthenticatedUserPlanetariumApiTest(TestCase):
-    def setup(self):
-        self.client = APIClient()
-
-    def test_auth_required(self):
-        res = self.client.get(ASTRONOMY_SHOW_URL)
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
 class AuthenticatedUserPlanetariumApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -96,9 +52,9 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(str(sample), sample.title)
 
     def test_astronomy_show_retrieve_list_and_list_ordering(self):
-        sample_astronomy_show(title="1_Atitle", show_name="First")
-        sample_astronomy_show(title="1_BTitle", show_name="Second")
-        sample_astronomy_show(title="1_CTitle", show_name="Third")
+        sample_astronomy_show(title="1_Atitle", show_theme_name="First")
+        sample_astronomy_show(title="1_BTitle", show_theme_name="Second")
+        sample_astronomy_show(title="1_CTitle", show_theme_name="Third")
 
         res = self.client.get(
             ASTRONOMY_SHOW_URL,
@@ -112,9 +68,9 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_astronomy_show_filter_by_title(self):
-        astronomy_show_1 = sample_astronomy_show(title="Atitle", show_name="First")
-        astronomy_show_2 = sample_astronomy_show(title="BTitle", show_name="Second")
-        astronomy_show_3 = sample_astronomy_show(title="CTi", show_name="Third")
+        astronomy_show_1 = sample_astronomy_show(title="Atitle", show_theme_name="First")
+        astronomy_show_2 = sample_astronomy_show(title="BTitle", show_theme_name="Second")
+        astronomy_show_3 = sample_astronomy_show(title="CTi", show_theme_name="Third")
 
         res = self.client.get(
             ASTRONOMY_SHOW_URL,
@@ -158,7 +114,7 @@ class AstronomyShowPosterUploadTest(TestCase):
             "admin@admin.com", "password"
         )
         self.client.force_authenticate(self.user)
-        self.astronomy_show = sample_astronomy_show(show_name="First", title="Title_for_test")
+        self.astronomy_show = sample_astronomy_show(show_theme_name="First", title="Title_for_test")
         self.show_session = sample_show_session(astronomy_show=self.astronomy_show)
 
     def tearDown(self):

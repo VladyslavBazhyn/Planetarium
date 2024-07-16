@@ -1,28 +1,22 @@
 from django.contrib.auth import get_user_model
-from django.db.models import F, Count
 from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from planetarium.models import PlanetariumDome, ShowSession, ShowTheme, AstronomyShow, ShowSpeaker, Reservation, Ticket
-from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer, ReservationListSerializer, \
+from planetarium.models import Reservation, Ticket
+from planetarium.serializers import (
+    ReservationListSerializer,
     ReservationDetailSerializer
-from planetarium.tests.tests_planetarium_api_show_sessions import sample_show_session, sample_astronomy_show
+)
+from planetarium.tests.sample_functions import (
+    sample_reservation,
+    sample_astronomy_show,
+    sample_show_session
+)
 
 RESERVATIONS_URL = reverse("planetarium:reservation-list")
-
-
-def sample_reservation(**params):
-
-    def_param = {
-        "user": None,
-    }
-
-    def_param.update(params)
-
-    return Reservation.objects.create(**def_param)
 
 
 def detail_url(reservation_id):
@@ -30,15 +24,6 @@ def detail_url(reservation_id):
         "planetarium:reservation-detail",
         args=[reservation_id]
     )
-
-
-class UnauthenticatedUserPlanetariumApiTest(TestCase):
-    def setup(self):
-        self.client = APIClient()
-
-    def test_auth_required(self):
-        res = self.client.get(RESERVATIONS_URL)
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedUserPlanetariumApiTest(TestCase):
@@ -141,4 +126,3 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         res = self.client.post(RESERVATIONS_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-

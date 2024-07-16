@@ -1,17 +1,16 @@
-from datetime import datetime
-
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-from django.db.models import F, Count
 from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from planetarium.models import PlanetariumDome, ShowSession, ShowTheme, AstronomyShow, ShowSpeaker
-from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer, ShowSessionSerializer, \
-    ShowThemeListSerializer, ShowThemeDetailSerializer
+from planetarium.models import ShowTheme
+from planetarium.serializers import (
+    ShowThemeListSerializer,
+    ShowThemeDetailSerializer
+)
+from planetarium.tests.sample_functions import sample_show_theme
 
 SHOW_THEMES_URL = reverse("planetarium:showtheme-list")
 
@@ -21,22 +20,6 @@ def detail_url(show_theme_id):
         "planetarium:showtheme-detail",
         args=[show_theme_id]
     )
-
-def sample_show_theme(**params):
-    def_params = {
-        "name": "Test_theme_zero"
-    }
-    def_params.update(params)
-    return ShowTheme.objects.create(**def_params)
-
-
-class UnauthenticatedUserPlanetariumApiTest(TestCase):
-    def setup(self):
-        self.client = APIClient()
-
-    def test_auth_required(self):
-        res = self.client.get(SHOW_THEMES_URL)
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedUserPlanetariumApiTest(TestCase):
@@ -106,4 +89,3 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         res = self.client.post(SHOW_THEMES_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-

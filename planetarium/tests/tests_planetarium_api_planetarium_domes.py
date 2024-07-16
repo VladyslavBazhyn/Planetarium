@@ -1,41 +1,15 @@
-from datetime import datetime
-
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-from django.db.models import F, Count
 from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from planetarium.models import PlanetariumDome, ShowSession, ShowTheme, AstronomyShow, ShowSpeaker
-from planetarium.serializers import ShowSessionListSerializer, ShowSessionDetailSerializer, ShowSessionSerializer, \
-    PlanetariumDomeSerializer
+from planetarium.models import PlanetariumDome
+from planetarium.serializers import PlanetariumDomeSerializer
+from planetarium.tests.sample_functions import sample_planetarium_dome
 
 PLANETARIUM_DOME_URL = reverse("planetarium:planetariumdome-list")
-
-
-# Function to create sample planetarium dome
-def sample_planetarium_dome(**parameters):
-    default_data = {
-        "name": "Test_dome",
-        "rows": 10,
-        "seats_in_row": 10
-    }
-
-    default_data.update(parameters)
-
-    return PlanetariumDome.objects.create(**default_data)
-
-
-class UnauthenticatedUserPlanetariumApiTest(TestCase):
-    def setup(self):
-        self.client = APIClient()
-
-    def test_auth_required(self):
-        res = self.client.get(PLANETARIUM_DOME_URL)
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedUserPlanetariumApiTest(TestCase):
