@@ -9,3 +9,4 @@ Dairy
 .env
 .dockerignore
 media
+.coverage
