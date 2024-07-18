@@ -27,8 +27,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-nbge_b0&!k(9n&trv4=y$+i@xy^j&!^kpeuh#h6x&66w!1e(**"
 
 # SECURITY WARNING: don"t run with debug turned on in production!
-# DEBUG = True
-DEBUG = False
+DEBUG = True
+# DEBUG = False
 ALLOWED_HOSTS = ["127.0.0.1"]
 
 
@@ -126,6 +126,13 @@ DATABASES = {
         "PORT": os.environ["POSTGRES_PORT"],
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 # Password validation
