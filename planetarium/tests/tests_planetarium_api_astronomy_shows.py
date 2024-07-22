@@ -1,3 +1,5 @@
+"""File with all tests astronomy show list and detail endpoints"""
+
 import tempfile
 import os
 

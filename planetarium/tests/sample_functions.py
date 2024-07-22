@@ -1,3 +1,7 @@
+"""
+This file collect all basic sample functions needed for tests
+"""
+
 from datetime import datetime
 
 from planetarium.models import (
@@ -35,6 +39,7 @@ def sample_show_speaker(**parameters):
     return ShowSpeaker.objects.create(**default_data)
 
 
+# Function to create sample show theme
 def sample_show_theme(**params):
     name = "Test_theme"
 
