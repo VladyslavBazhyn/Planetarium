@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-nbge_b0&!k(9n&trv4=y$+i@xy^j&!^kpeuh#h6x&66w!1e(**
 # SECURITY WARNING: don"t run with debug turned on in production!
 DEBUG = True
 # DEBUG = False
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -126,14 +126,6 @@ DATABASES = {
         "PORT": os.environ["POSTGRES_PORT"],
     }
 }
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
