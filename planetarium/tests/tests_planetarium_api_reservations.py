@@ -22,6 +22,7 @@ RESERVATIONS_URL = reverse("planetarium:reservation-list")
 
 
 def detail_url(reservation_id):
+    """Return URL for detail endpoint of given id"""
     return reverse(
         "planetarium:reservation-detail",
         args=[reservation_id]
@@ -46,6 +47,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_reservation_retrieve_list_and_list_ordering(self):
+        """Test whether retrieve correct list serializer and it ordered correctly"""
         sample_reservation(user=self.user)
         sample_reservation(user=self.user_2)
         sample_reservation(user=self.user_3)
@@ -64,6 +66,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data["results"], serializer.data)
 
     def test_reservation_filter_by_show_session_title(self):
+        """Test whether filtering working correctly"""
         astronomy_show_1 = sample_astronomy_show(
             title="First", show_theme_name="2_test"
         )
@@ -109,6 +112,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data["results"], serializer.data)
 
     def test_reservation_retrieve_detail(self):
+        """Test whether detail endpoint retrieve correct detail serializer"""
         astronomy_show_1 = sample_astronomy_show(
             title="First", show_theme_name="2_test"
         )
@@ -134,7 +138,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_reservation_create_forbidden(self):
-
+        """Test whether creation with incorrect data forbidden"""
         astronomy_show_1 = sample_astronomy_show(
             title="First", show_theme_name="2_test"
         )

@@ -24,11 +24,13 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_planetarium_dome_str_correct(self):
+        """Test whether str function return correct value"""
         dome_1 = sample_planetarium_dome()
 
         self.assertEqual(str(dome_1), dome_1.name)
 
     def test_planetarium_dome_retrieve_serializer(self):
+        """Test whether retrieve correct serializer"""
         sample_planetarium_dome()
         sample_planetarium_dome(name="1_Test_dome")
         sample_planetarium_dome(name="1_Test_dome_again")
@@ -43,6 +45,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_planetarium_dome_filter_by_capacity(self):
+        """Test whether filtering working correctly"""
         dome_1 = sample_planetarium_dome(rows=1, seats_in_row=5)
         dome_2 = sample_planetarium_dome(rows=1, seats_in_row=10)
         dome_3 = sample_planetarium_dome(rows=1, seats_in_row=100)
@@ -61,7 +64,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertIn(serializer_3.data, res.data)
 
     def test_planetarium_dome_create_forbidden(self):
-
+        """Test whether creation with incorrect data forbidden"""
         sample_planetarium_dome()
 
         payload = {

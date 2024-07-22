@@ -18,6 +18,7 @@ SHOW_THEMES_URL = reverse("planetarium:showtheme-list")
 
 
 def detail_url(show_theme_id):
+    """Return URL for detail endpoint of given id"""
     return reverse(
         "planetarium:showtheme-detail",
         args=[show_theme_id]
@@ -33,7 +34,8 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         )
         self.client.force_authenticate(self.user)
 
-    def test_show_theme_retrieve_list(self):
+    def test_show_theme_retrieve_list_serializer(self):
+        """Test whether retrieve correct list serializer"""
         sample_show_theme()
         sample_show_theme(name="Test_first")
         sample_show_theme(name="Test_second")
@@ -47,6 +49,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_show_themes_filter_by_name(self):
+        """Test whether filtering working correctly"""
         show_theme_1 = sample_show_theme()
         show_theme_2 = sample_show_theme(name="1_Test_first")
         show_theme_3 = sample_show_theme(name="1_Test_second")
@@ -66,6 +69,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertIn(serializer_3.data, res.data)
 
     def test_show_theme_retrieve_detail(self):
+        """Test whether detail endpoint retrieve correct detail serializer"""
         sample = sample_show_theme()
 
         url = detail_url(sample.id)
@@ -79,11 +83,13 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_show_session_str_correct(self):
+        """Test whether str function return correct value"""
         show_theme = sample_show_theme()
 
         self.assertEqual(str(show_theme), show_theme.name)
 
     def test_show_theme_create_forbidden(self):
+        """Test whether creation with incorrect data forbidden"""
         payload = {
             "name": "Test_theme"
         }

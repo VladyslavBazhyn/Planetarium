@@ -27,7 +27,10 @@ class UnauthenticatedUserPlanetariumApiTest(TestCase):
         self.client = APIClient()
 
     def test_auth_required(self):
-
+        """
+        Test whether unauthenticated user can't get access to closed endpoints
+        but can register.
+        """
         res = self.client.get(ASTRONOMY_SHOW_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 

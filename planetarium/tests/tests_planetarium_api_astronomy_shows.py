@@ -33,6 +33,7 @@ def poster_upload_url(astronomy_show_id: int):
 
 
 def detail_url(astronomy_show_id):
+    """Return URL for detail endpoint of given id"""
     return reverse(
         "planetarium:astronomyshow-detail",
         args=[astronomy_show_id]
@@ -49,11 +50,13 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_astronomy_show_str_correct(self):
+        """Test whether str function return correct value"""
         sample = sample_astronomy_show()
 
         self.assertEqual(str(sample), sample.title)
 
     def test_astronomy_show_retrieve_list_and_list_ordering(self):
+        """Test whether retrieve correct list serializer and it ordered correctly"""
         sample_astronomy_show(title="1_Atitle", show_theme_name="First")
         sample_astronomy_show(title="1_BTitle", show_theme_name="Second")
         sample_astronomy_show(title="1_CTitle", show_theme_name="Third")
@@ -70,6 +73,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_astronomy_show_filter_by_title(self):
+        """Test whether filtering working correctly"""
         astronomy_show_1 = sample_astronomy_show(
             title="Atitle", show_theme_name="First"
         )
@@ -94,6 +98,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertNotIn(serializer_3.data, res.data)
 
     def test_astronomy_show_retrieve_detail(self):
+        """Test whether detail endpoint retrieve correct detail serializer"""
         sample = sample_astronomy_show()
 
         url = detail_url(sample.id)
@@ -105,6 +110,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_astronomy_show_create_forbidden(self):
+        """Test whether creation with incorrect data forbidden"""
         payload = {
             "title": "astronomy_show",
             "description": "some_description",
@@ -161,6 +167,7 @@ class AstronomyShowPosterUploadTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_post_poster_to_astronomy_show_list_should_not_work(self):
+        """Test whether you can't upload image from astronomy show list page"""
         url = ASTRONOMY_SHOW_URL
         with tempfile.NamedTemporaryFile(suffix=".jpg") as ntf:
             img = Image.new("RGB", (10, 10))
@@ -181,6 +188,7 @@ class AstronomyShowPosterUploadTest(TestCase):
         self.assertFalse(astronomy_show.poster)
 
     def test_poster_url_is_shown_on_astronomy_show_detail(self):
+        """Test whether poster url exist on astronomy show detail endpoint"""
         url = poster_upload_url(self.astronomy_show.id)
         with tempfile.NamedTemporaryFile(suffix=".jpg") as ntf:
             img = Image.new("RGB", (10, 10))
@@ -196,6 +204,7 @@ class AstronomyShowPosterUploadTest(TestCase):
             self.assertIn("poster", res.data)
 
     def test_poster_url_is_shown_on_astronomy_show_list(self):
+        """Test whether poster url exist on astronomy show list endpoint"""
         url = poster_upload_url(self.astronomy_show.id)
         with tempfile.NamedTemporaryFile(suffix=".jpg") as ntf:
             img = Image.new("RGB", (10, 10))

@@ -18,6 +18,7 @@ SHOW_SPEAKERS_ULR = reverse("planetarium:showspeaker-list")
 
 
 def detail_url(show_speaker_id):
+    """Return URL for detail endpoint of given id"""
     return reverse(
         "planetarium:showspeaker-detail",
         args=[show_speaker_id]
@@ -34,11 +35,13 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_show_speaker_str_correct(self):
+        """Test whether str function return correct value"""
         show_speaker = sample_show_speaker()
 
         self.assertEqual(str(show_speaker), "Bob Obo")
 
-    def test_show_speaker_retrieve_list(self):
+    def test_show_speaker_retrieve_list_serializer(self):
+        """Test whether retrieve correct list serializer"""
         sample_show_speaker(first_name="Second")
         sample_show_speaker(last_name="Strong")
         sample_show_speaker(profession="Good Guy")
@@ -53,7 +56,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_show_speaker_filters(self):
-
+        """Test whether filtering working correctly"""
         sample_show_speaker(first_name="Second")
         sample_show_speaker(last_name="Strong")
         sample_show_speaker(profession="Good Guy")
@@ -102,6 +105,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertIn(serializer_3.data, res_3.data)
 
     def test_show_speaker_retrieve_detail(self):
+        """Test whether detail endpoint retrieve correct detail serializer"""
         show_speaker = sample_show_speaker(first_name="Second")
 
         url = detail_url(show_speaker.id)
@@ -113,7 +117,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_show_speaker_create_forbidden(self):
-
+        """Test whether creation with incorrect data forbidden"""
         payload = {
             "first_name": "Bob",
             "last_name": "Good"

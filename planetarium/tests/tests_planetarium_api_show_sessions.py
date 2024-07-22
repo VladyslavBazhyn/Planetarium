@@ -24,6 +24,7 @@ SHOW_SESSION_URL = reverse("planetarium:showsession-list")
 
 
 def detail_url(show_session_id):
+    """Return URL for detail endpoint of given id"""
     return reverse(
         "planetarium:showsession-detail",
         args=[show_session_id]
@@ -40,6 +41,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_show_session_retrieve_list_and_list_ordering(self):
+        """Test whether retrieve correct list serializer and it ordered correctly"""
         sample_show_session(
             show_day="2025-01-01",
             time_start="11:00:00",
@@ -82,6 +84,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data["results"], serializer.data)
 
     def test_show_session_filters(self):
+        """Test whether filtering working correctly"""
         sample_show_session(
             show_day="2025-01-01",
             time_start="11:00:00",
@@ -150,6 +153,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data["results"], serializer.data)
 
     def test_show_session_retrieve_detail(self):
+        """Test whether detail endpoint retrieve correct detail serializer"""
         sample = sample_show_session()
 
         url = detail_url(sample.id)
@@ -169,6 +173,7 @@ class AuthenticatedUserPlanetariumApiTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_show_session_create_forbidden(self):
+        """Test whether creation with incorrect data forbidden"""
         payload = {
             "show_day": "2025-03-03"
         }
