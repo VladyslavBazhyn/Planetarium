@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     "user",
     "rest_framework",
     "drf_spectacular",
-    # "debug_toolbar",
     "rest_framework_simplejwt"
+    # "debug_toolbar",
 ]
 
 MIDDLEWARE = [
@@ -58,6 +58,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware"
 ]
 
 INTERNAL_IPS = [
@@ -170,9 +171,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "user.User"
-
-# MEDIA_ROOT = "/files/media"
-# MEDIA_URL = "/media/"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

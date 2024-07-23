@@ -10,3 +10,4 @@ Dairy
 .dockerignore
 media
 .coverage
+static
