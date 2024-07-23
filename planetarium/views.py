@@ -1,3 +1,6 @@
+"""All views of this project"""
+
+
 from datetime import datetime
 
 from django.db.models import (
@@ -7,12 +10,15 @@ from django.db.models import (
     IntegerField,
     Prefetch
 )
+
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+
 
 from planetarium.models import (
     PlanetariumDome,
@@ -49,6 +55,10 @@ class PlanetariumDomeViewSet(viewsets.ModelViewSet):
     serializer_class = PlanetariumDomeSerializer
 
     def get_queryset(self):
+        """
+        Get correct queryset to avoid N+1 problem
+        and filter it by capacity
+        """
         queryset = self.queryset
 
         capacity = self.request.query_params.get("capacity", None)
@@ -78,6 +88,7 @@ class PlanetariumDomeViewSet(viewsets.ModelViewSet):
         ]
     )
     def list(self, request, *args, **kwargs):
+        """Changed function added filter by capacity"""
         return super().list(request, *args, **kwargs)
 
 
@@ -86,6 +97,7 @@ class ShowThemeViewSet(viewsets.ModelViewSet):
     serializer_class = ShowThemeSerializer
 
     def get_serializer_class(self):
+        """Function to choose correct serializer"""
         serializer_class = self.serializer_class
         if self.action == "list":
             serializer_class = ShowThemeListSerializer
@@ -95,6 +107,10 @@ class ShowThemeViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def get_queryset(self):
+        """
+        Get correct queryset to avoid N+1 problem
+        and filter it by name
+        """
         queryset = self.queryset
 
         name = self.request.query_params.get("name")
@@ -114,6 +130,7 @@ class ShowThemeViewSet(viewsets.ModelViewSet):
         ]
     )
     def list(self, request, *args, **kwargs):
+        """Changed function added filter by name"""
         return super().list(request, *args, **kwargs)
 
 
@@ -144,6 +161,7 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
     pagination_class = ShowSessionPagination
 
     def get_serializer_class(self):
+        """Function to choose correct serializer"""
         serializer_class = self.serializer_class
         if self.action == "list":
             serializer_class = ShowSessionListSerializer
@@ -153,6 +171,10 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def get_queryset(self):
+        """
+        Get correct queryset to avoid N+1 problem
+        and filter it by date and show title
+        """
         queryset = self.queryset
 
         date = self.request.query_params.get("date")
@@ -194,6 +216,7 @@ class ShowSessionViewSet(viewsets.ModelViewSet):
         ]
     )
     def list(self, request, *args, **kwargs):
+        """Added filter by date and show title"""
         return super().list(request, *args, **kwargs)
 
 
@@ -202,6 +225,7 @@ class ShowSpeakerViewSet(viewsets.ModelViewSet):
     serializer_class = ShowSpeakerSerializer
 
     def get_serializer_class(self):
+        """Function to choose correct serializer"""
         serializer_class = self.serializer_class
         if self.action == "list":
             serializer_class = ShowSpeakerListSerializer
@@ -211,6 +235,10 @@ class ShowSpeakerViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def get_queryset(self):
+        """
+        Get correct queryset to avoid N+1 problem
+        and filter it by first/last name and profession
+        """
         queryset = self.queryset
 
         first_name = self.request.query_params.get("first_name")
@@ -254,6 +282,7 @@ class ShowSpeakerViewSet(viewsets.ModelViewSet):
         ]
     )
     def list(self, request, *args, **kwargs):
+        """Added filter by first/last name and profession"""
         return super().list(request, *args, **kwargs)
 
 
@@ -284,9 +313,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
         ]
     )
     def list(self, request, *args, **kwargs):
+        """Added filter by show title"""
         return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
+        """Function to choose correct serializer"""
         serializer_class = self.serializer_class
         if self.action == "list":
             serializer_class = ReservationListSerializer
@@ -295,6 +326,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def get_queryset(self):
+        """
+        Get correct queryset to avoid N+1 problem
+        and filter it by show title
+        """
         queryset = (
             self.queryset.select_related("user")
             .prefetch_related(
@@ -326,6 +361,7 @@ class AstronomyShowViewSet(viewsets.ModelViewSet):
     serializer_class = AstronomyShowListSerializer
 
     def get_serializer_class(self):
+        """Function to choose correct serializer"""
         serializer_class = self.serializer_class
         if self.action == "list":
             serializer_class = AstronomyShowListSerializer
@@ -336,6 +372,10 @@ class AstronomyShowViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def get_queryset(self):
+        """
+        Get correct queryset to avoid N+1 problem
+        and filter it by title
+        """
         queryset = self.queryset
 
         title = self.request.query_params.get("title")
@@ -351,7 +391,7 @@ class AstronomyShowViewSet(viewsets.ModelViewSet):
         url_path="upload-poster",
     )
     def upload_poster(self, request, pk=None):
-
+        """Function for uploading poster to astronomy show"""
         astronomy_show = self.get_object()
         serializer = self.get_serializer(astronomy_show, data=request.data)
 
@@ -373,4 +413,5 @@ class AstronomyShowViewSet(viewsets.ModelViewSet):
         ]
     )
     def list(self, request, *args, **kwargs):
+        """Added filter by title"""
         return super().list(request, *args, **kwargs)

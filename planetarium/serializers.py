@@ -1,3 +1,12 @@
+"""
+All serializers which used in this project.
+Serializers usually separate on three pert:
+    - Base serializer (Used as a basis for handling with serializers, adding new general fields etc.)
+    - List serializer (Used for handling all information which shown on list endpoints)
+    - Detail serializer (Used for handling all information which shown on detail endpoints)
+"""
+
+
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -44,6 +53,7 @@ class ShowSpeakerSerializer(serializers.ModelSerializer):
         read_only_fields = ("full_name", "id")
 
     def get_full_name(self, obj):
+        """Function for taking speaker's full name"""
         return f"{obj.first_name} {obj.last_name}"
 
 
@@ -96,6 +106,10 @@ class AstronomyShowListSerializer(AstronomyShowSerializer):
         )
 
     def create(self, validated_data):
+        """
+        Changed save method to correctly adding show themes and poster
+        to astronomy show because of theirs relation type
+        """
         show_themes = validated_data.pop("show_themes")
         validated_data.pop("poster")
         astronomy_show = AstronomyShow.objects.create(**validated_data)
@@ -149,6 +163,10 @@ class ShowSessionSerializer(serializers.ModelSerializer):
     tickets_available = serializers.IntegerField(read_only=True)
 
     def to_representation(self, instance):
+        """
+        This function change usual representation of
+        show_speakers field for better readability
+        """
         representation = super().to_representation(instance)
         representation["show_speakers"] = ShowSpeakerSerializer(
             instance.show_speakers,
@@ -170,6 +188,10 @@ class ShowSessionSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
+        """
+        Changed save method to correctly adding show speakers
+        to show session because of theirs relation type
+        """
         show_speakers = validated_data.pop("show_speakers", None)
         show_session = ShowSession.objects.create(**validated_data)
         if show_speakers:
@@ -177,6 +199,7 @@ class ShowSessionSerializer(serializers.ModelSerializer):
         return show_session
 
     def validate(self, data):
+        """Function to call method for validating show speakers working time"""
         show_speakers = data.get("show_speakers", [])
         show_day = data.get("show_day")
         time_start = data.get("time_start")
@@ -214,6 +237,10 @@ class ShowSessionListSerializer(ShowSessionSerializer):
         )
 
     def to_representation(self, instance):
+        """
+        This function change usual representation of
+        show_speakers field for better readability
+        """
         representation = super().to_representation(instance)
         representation["show_speakers"] = ShowSpeakerListSerializer(
             instance.show_speakers,
@@ -223,6 +250,7 @@ class ShowSessionListSerializer(ShowSessionSerializer):
 
 
 class ShowSessionDetailSerializer(ShowSessionSerializer):
+    """This serializers now don't have any differences from base serializer"""
     pass
 
 
@@ -264,6 +292,7 @@ class TicketListSerializer(TicketSerializer):
         )
 
     def validate(self, attrs):
+        """Function to call method for validating ticket's set and row"""
         data = super(TicketSerializer, self).validate(attrs)
         Ticket.validate_ticket(
             attrs["row"],
@@ -288,11 +317,18 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = (
-            "id", "created_at", "tickets",
-            "astronomy_show_title", "taken_places"
+            "id",
+            "created_at",
+            "tickets",
+            "astronomy_show_title",
+            "taken_places"
         )
 
     def create(self, validated_data):
+        """
+        Changed save method to correctly adding tickets
+        to reservation because of theirs relation type
+        """
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
             reservation = Reservation.objects.create(**validated_data)
@@ -301,6 +337,7 @@ class ReservationSerializer(serializers.ModelSerializer):
             return reservation
 
     def get_astronomy_show_title(self, obj):
+        """Function to take specific astronomy show title by models relations"""
         try:
             show_session = obj.tickets.show_session
         except AttributeError:
@@ -310,6 +347,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         return None
 
     def get_taken_places(self, obj):
+        """Function to take all taken places for specific astronomy show"""
         taken_places = obj.tickets.all()
         return TicketSeatsSerializer(taken_places, many=True).data
 
@@ -323,27 +361,30 @@ class ReservationDetailSerializer(ReservationSerializer):
         model = Reservation
         fields = (
             "id",
-            # "astronomy_show_title",
+            "astronomy_show_title",
             "show_session_date",
             "show_session_time_start",
-            # "taken_places",
+            "taken_places",
             "show_session_speakers",
             "created_at"
         )
 
     def get_show_session_date(self, obj):
+        """Function to take show session date for specific show by models relations"""
         show_session = obj.tickets.first().show_session
         if show_session:
             return show_session.show_day
         return None
 
     def get_show_session_time_start(self, obj):
+        """Function to take show session time start for specific show by models relations"""
         show_session = obj.tickets.first().show_session
         if show_session:
             return show_session.time_start
         return None
 
     def get_show_session_speakers(self, obj):
+        """Function to take show session speakers for specific show by models relations"""
         show_session = obj.tickets.first().show_session
         if show_session:
             speakers = show_session.show_speakers.all()
@@ -352,7 +393,6 @@ class ReservationDetailSerializer(ReservationSerializer):
 
 
 class ReservationListSerializer(ReservationSerializer):
-    # taken_places = serializers.SerializerMethodField()
 
     class Meta:
         model = Reservation

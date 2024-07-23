@@ -1,3 +1,5 @@
+"""All models of Planetarium project"""
+
 import os
 import uuid
 
@@ -9,6 +11,7 @@ from planetarium_service import settings
 
 
 def astronomy_show_image_file_path(instance, filename):
+    """Function for creation special unique filename for image"""
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
 
@@ -16,6 +19,9 @@ def astronomy_show_image_file_path(instance, filename):
 
 
 class ShowSpeaker(models.Model):
+
+    """Model of speaker who can host the astronomy show"""
+
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     profession = models.CharField(max_length=30)
@@ -25,10 +31,14 @@ class ShowSpeaker(models.Model):
 
     @property
     def full_name(self):
+        """Get full name instead of wrote it in separate field"""
         return f"{self.first_name} {self.last_name}"
 
 
 class ShowTheme(models.Model):
+
+    """Model of theme which should be used for creation astronomy show"""
+
     name = models.CharField(
         max_length=30,
         unique=True
@@ -39,6 +49,9 @@ class ShowTheme(models.Model):
 
 
 class AstronomyShow(models.Model):
+
+    """Model of astronomy show which choose for creating show session"""
+
     title = models.CharField(max_length=30,
                              unique=True
                              )
@@ -61,6 +74,9 @@ class AstronomyShow(models.Model):
 
 
 class PlanetariumDome(models.Model):
+
+    """Model of dome where astronomy shows are run"""
+
     name = models.CharField(max_length=30)
     rows = models.IntegerField()
     seats_in_row = models.IntegerField()
@@ -74,6 +90,12 @@ class PlanetariumDome(models.Model):
 
 
 class ShowSession(models.Model):
+
+    """
+    Model of show session in time of which you can observe
+    astronomy show in planetarium dome
+    """
+
     astronomy_show = models.ForeignKey(
         AstronomyShow,
         on_delete=models.CASCADE,
@@ -102,6 +124,11 @@ class ShowSession(models.Model):
 
     @staticmethod
     def validate_show_speakers(show_speakers, show_day, time_start, time_end):
+        """
+        Function to validate whether speakers which should host the show
+        will host different session in same time.
+        It's important for normal sessions handling.
+        """
         for speaker in show_speakers:
             other_speaker_shows = speaker.speakers_show.filter(
                 show_day=show_day
@@ -135,6 +162,12 @@ class ShowSession(models.Model):
 
 
 class Reservation(models.Model):
+
+    """
+    Model for reservation which collect all user's tickets
+    for a specific show session.
+    """
+
     created_at = models.DateTimeField(
         auto_now_add=True
     )
@@ -154,6 +187,12 @@ class Reservation(models.Model):
 
 
 class Ticket(models.Model):
+
+    """
+    Model of ticket which collect number of row and seat
+    for specific planetarium dome and show session
+    """
+
     row = models.IntegerField()
     seat = models.IntegerField()
     show_session = models.ForeignKey(
@@ -169,6 +208,10 @@ class Ticket(models.Model):
 
     @staticmethod
     def validate_ticket(row, seat, planetarium_dome, error_to_raise):
+        """
+        Function for validating whether seat and row
+        on which you try to take ticket already taken.
+        """
         for (
                 ticket_attr_value,
                 ticket_attr_name,

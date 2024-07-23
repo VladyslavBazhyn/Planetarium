@@ -1,3 +1,5 @@
+"""User model which used in this project"""
+
 from django.contrib.auth.models import (
     AbstractUser,
     BaseUserManager,

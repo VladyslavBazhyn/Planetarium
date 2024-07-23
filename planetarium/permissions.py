@@ -1,3 +1,6 @@
+"""Custom permission class which used as base permission class in project"""
+
+
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
