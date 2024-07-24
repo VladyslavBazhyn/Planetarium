@@ -42,9 +42,9 @@ For running test:
 
 ## Contact Information
 
-This project made by https://github.com/VladyslavBazhyn/
-My mail: mr.darmstadtium@gmail.com
-My telegram: https://t.me/MrDarmstadtium
+This project was created by [Vladyslav Bazhyn](https://github.com/VladyslavBazhyn/)
+- Mail: mr.darmstadtium@gmail.com
+- Telegram: [MrDarmstadtium](https://t.me/MrDarmstadtium)
 
 ### Prerequisites
 - Python 3.x
