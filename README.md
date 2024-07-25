@@ -4,31 +4,29 @@ Planetarium API IService
 This API provides ease and clear way to handle of planetarium working.
 
 ## Table of Contents
-- [Diagram](#diagram)
 - [Features](#features)
 - [Installation](#installation)
+- [Getting access](#getting-access)
 - [License](#license)
 - [Running Tests](#running-tests)
 - [Contact Information](#contact-information)
 
-## Diagram
-This API described by this diagram:
-
-![System Architecture](doc/planetarium_diagram.drawio.png)
-
 ## Features
+- JWT authentication
+- Admin panel /admin
+- Managing reservations and tickets
+- Managing planetarium workers
 - Creation and handling of planetarium domes, astronomy shows, show sessions, tickets.
 - Validation tickets and working time of show speakers.
 
 ## Installation
 
-To start project locally:
-- You need to have installed Docker Desktop
-- Clone the repository: https://github.com/VladyslavBazhyn/Planetarium
-- python -m venv venv
-- On Windows: venv/Scripts/activate / On macOS or Linux: source venv/bin/activate
-- Create .env according to .env.example
+Run with Docker:
 - docker-compose up --build
+
+## Getting access
+- create user via api/user/register
+- get access token via api/user/token
 
 ## License
 
