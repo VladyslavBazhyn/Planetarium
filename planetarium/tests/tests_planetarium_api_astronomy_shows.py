@@ -135,9 +135,6 @@ class AstronomyShowPosterUploadTest(TestCase):
             astronomy_show=self.astronomy_show
         )
 
-    def tearDown(self):
-        self.astronomy_show.poster.delete()
-
     def test_upload_poster_to_astronomy_show(self):
         """Test uploading poster to astronomy_show"""
         url = poster_upload_url(self.astronomy_show.id)

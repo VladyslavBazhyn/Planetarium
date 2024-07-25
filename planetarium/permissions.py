@@ -1,10 +1,11 @@
-"""Custom permission class which used as base permission class in project"""
-
-
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsAdminOrIfAuthenticatedReadOnly(BasePermission):
+    """
+    Custom permission to only allow admins to edit objects,
+    but allow read-only access to authenticated users.
+    """
     def has_permission(self, request, view):
         return bool(
             (
